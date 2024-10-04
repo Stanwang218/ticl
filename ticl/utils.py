@@ -473,8 +473,9 @@ def make_training_callback(
 
             if epoch != "on_exit":
                 inference_time = None
-                gpu_start_time = torch.cuda.Event(enable_timing=True)
-                gpu_end_time = torch.cuda.Event(enable_timing=True)
+                if on_cuda:
+                    gpu_start_time = torch.cuda.Event(enable_timing=True)
+                    gpu_end_time = torch.cuda.Event(enable_timing=True)
                 if validate:
                     inference_start = time.time()
                     if on_cuda:
@@ -483,7 +484,8 @@ def make_training_callback(
                     validation_score, per_dataset_score = validate_model(model, config)
                     
                     inference_end = time.time()
-                    gpu_end_time.record()
+                    if on_cuda:
+                        gpu_end_time.record()
                     torch.cuda.synchronize()
                     
                     inference_time = inference_end - inference_start
