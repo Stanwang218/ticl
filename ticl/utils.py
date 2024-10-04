@@ -486,7 +486,7 @@ def make_training_callback(
                     inference_end = time.time()
                     if on_cuda:
                         gpu_end_time.record()
-                    torch.cuda.synchronize()
+                        torch.cuda.synchronize()
                     
                     inference_time = inference_end - inference_start
                     if on_cuda:
