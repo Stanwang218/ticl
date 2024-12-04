@@ -95,6 +95,17 @@ def test_baam():
     assert classifier.score(X_test, y_test) > 0.9
 
 
+def test_baam_default_model():
+    X, y = load_iris(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+    classifier = MotherNetAdditiveClassifier(device='cpu')
+    classifier.fit(X_train, y_train)
+    print(classifier)
+    prob = classifier.predict_proba(X_test)
+    assert (prob.argmax(axis=1) == classifier.predict(X_test)).all()
+    assert classifier.score(X_test, y_test) > 0.9
+
+
 def test_baam_regression():
     rng = np.random.RandomState(3)
     X = rng.normal(size=(400, 2))
