@@ -1,13 +1,15 @@
 # ticl - Tabular In-Context Learning
 
-This repository contains code for training and prediction of several models for tabular in-context learning, including MotherNet and GAMformer.
-MotherNet is a hypernetwork foundational model (or conditional neural process) for tabular data classification that creates a small neural network.
-GAMformer is a model trained to output an interpretable, additive model using in-context learning.
+This repository contains code for training and prediction of several models for tabular in-context learning, including **MotherNet**, **GAMformer** and **TabFlex**.
+**MotherNet** is a hypernetwork foundational model (or conditional neural process) for tabular data classification that creates a small neural network.
+**GAMformer** is a model trained to output an interpretable, additive model using in-context learning.
+**TabFlex** is a extension of ``TabPFN``  using linear attention that overcomes the scaling limitations of ``TabPFN`` in terms of features, models and number of classes.
 
 Both the architecture and the code in this repository is based on the [TabPFN](https://github.com/automl/TabPFN) by the [Freiburg AutoML group](https://www.automl.org/).
 
-This is a research prototype, shared for research use, and not meant for real-world applications. Responsibility for using the models contained in this repository,
-as well monitoring and assessing potential impact of the models lies with the user of the code.
+The repository includes code for training and prediction with these models, as well as links to checkpoints for the models used in our publications.
+
+All models provided are research prototypes, shared for research use, and not meant for real-world applications. Responsibility for using the models contained in this repository, as well monitoring and assessing potential impact of the models lies with the user of the code.
 
 ## Installation
 
@@ -16,10 +18,16 @@ It's recommended to use conda to create an environment using the provided enviro
 ```
 conda create -f environment.yml
 ```
+Then install the package:
+```
+conda activate ticl
+pip install -e .
+```
+# MotherNet
 
 ## Getting started
 
-A simple usage of our sklearn interface is:
+A simple usage of the MotherNet sklearn interface is:
 ```python
 from sklearn.metrics import accuracy_score
 from sklearn.datasets import load_breast_cancer
@@ -56,10 +64,19 @@ The results in the paper correspond to ``python fit_model.py mothernet -L 2``, t
 Data-parallel Multi-GPU training is in principal supported using ``torchrun``.
 By default, experiments are tracked using MLFlow if the ``MLFLOW_HOSTNAME`` environment variable is set. 
 
+# GAMformer
+
+WIP
+
+# TabFlex
+
+WIP
+
 ## Papers
 This work is described in [MotherNet: A Foundational Hypernetwork for Tabular Classification](https://arxiv.org/pdf/2312.08598).
 Please cite that work when using this code. As this work rests on the TabPFN work, I would suggest you also cite their [paper](https://arxiv.org/abs/2207.01848),
 which also provides more background on the methodology.
+
 
 ## License
 Copyright 2022 Noah Hollmann, Samuel Müller, Katharina Eggensperger, Frank Hutter
