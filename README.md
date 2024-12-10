@@ -1,10 +1,12 @@
-# MotherNet
+# Tabular In-Context Learning Models
 
-The MotherNet is a hypernetwork foundational model (or conditional neural process) for tabular data classification.
-Both the architecture and the code is based on the [TabPFN](https://github.com/automl/TabPFN) by the [Freiburg AutoML group](https://www.automl.org/).
+This repository is based on the code and architecture of [TabPFN](https://github.com/automl/TabPFN) by the [Freiburg AutoML group](https://www.automl.org/).
 
-This is a research prototype, shared for research use, and not meant for real-world applications. Responsibility for using the models contained in this repository,
-as well monitoring and assessing potential impact of the models lies with the user of the code.
+This repository adds additional scaffolding for training the model via a CLI and adds several new model families, in particular **MotherNet** a hyper-network architecture based on ``TabPFN``, and **GAMformer** an architecture that produces a Generalized Additive Model via in-context learning, and **TabFlex**, a transformer architecture using linear attention that overcomes the scaling limitations of ``TabPFN`` in terms of features, models and number of classes.
+
+The repository includes code for training and prediction with these models, as well as links to checkpoints for the models used in our publications.
+
+All models provided are research prototypes, shared for research use, and not meant for real-world applications. Responsibility for using the models contained in this repository, as well monitoring and assessing potential impact of the models lies with the user of the code.
 
 ## Installation
 
@@ -13,10 +15,11 @@ It's recommended to use conda to create an environment using the provided enviro
 ```
 conda create -f environment.yml
 ```
+# MotherNet
 
 ## Getting started
 
-A simple usage of our sklearn interface is:
+A simple usage of the MotherNet sklearn interface is:
 ```python
 from sklearn.metrics import accuracy_score
 from sklearn.datasets import load_breast_cancer
@@ -53,10 +56,19 @@ The results in the paper correspond to ``python fit_model.py mothernet -L 2``, t
 Data-parallel Multi-GPU training is in principal supported using ``torchrun``.
 By default, experiments are tracked using MLFlow if the ``MLFLOW_HOSTNAME`` environment variable is set. Using MLFlow for a particular run can be disabled with the ``--no-mlflow`` argument.
 
+# GAMformer
+
+WIP
+
+# TabFlex
+
+WIP
+
 ## Papers
 This work is described in [MotherNet: A Foundational Hypernetwork for Tabular Classification](https://arxiv.org/pdf/2312.08598).
 Please cite that work when using this code. As this work rests on the TabPFN work, I would suggest you also cite their [paper](https://arxiv.org/abs/2207.01848),
 which also provides more background on the methodology.
+
 
 ## License
 Copyright 2022 Noah Hollmann, Samuel Müller, Katharina Eggensperger, Frank Hutter
