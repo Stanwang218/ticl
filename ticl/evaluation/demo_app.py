@@ -13,7 +13,7 @@ import pandas as pd
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import make_column_transformer
-from ticl.prediction.mothernet_additive import MotherNetAdditiveClassifier
+from ticl.prediction.mothernet_additive import GAMformerClassifier
 from interpret.glassbox import ExplainableBoostingClassifier
 
 
@@ -84,7 +84,7 @@ ct = make_column_transformer((OneHotEncoder(sparse_output=False, max_categories=
 model_string = "baam_H512_Dclass_average_e128_nsamples500_numfeatures20_padzerosFalse_03_14_2024_15_03_22_epoch_1520.cpkt"
 model_path = get_mn_model(model_string)
 
-additive = MotherNetAdditiveClassifier(path=model_path, device="cuda:3")
+additive = GAMformerClassifier(path=model_path, device="cuda:3")
 # calling fit to read the model to memory
 iris = load_iris()
 additive.fit(iris.data, iris.target)

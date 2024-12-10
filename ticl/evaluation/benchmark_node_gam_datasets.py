@@ -18,7 +18,7 @@ from sklearn.preprocessing import OneHotEncoder, FunctionTransformer, StandardSc
 from xgboost import XGBClassifier
 
 from ticl.evaluation.node_gam_data import DATASETS
-from ticl.prediction import MotherNetAdditiveClassifier
+from ticl.prediction import GAMformerClassifier
 from ticl.utils import get_mn_model
 
 
@@ -114,10 +114,10 @@ def process_model(clf, name, X, y, X_test, y_test, n_splits=3, test_size=0.25, n
                          [feature['density'] for feature in ebm_exp._internal_obj['specific']])) for ebm_exp
                 in ebm_explanations
             ]
-        elif isinstance(clf, MotherNetAdditiveClassifier):
+        elif isinstance(clf, GAMformerClassifier):
             record['bin_edges'] = [dict(zip(column_names, scores['estimator'][i].bin_edges_)) for i in range(n_splits)]
             record['w'] = [dict(zip(column_names, scores['estimator'][i].w_)) for i in range(n_splits)]
-        elif isinstance(clf, Pipeline) and isinstance(clf['baam'], MotherNetAdditiveClassifier):
+        elif isinstance(clf, Pipeline) and isinstance(clf['baam'], GAMformerClassifier):
             record['bin_edges'] = [dict(zip(column_names, scores['estimator'][i].steps[-1][1].bin_edges_)) for i in
                                    range(n_splits)]
             record['w'] = [dict(zip(column_names, scores['estimator'][i].steps[-1][1].w_)) for i in range(n_splits)]
@@ -218,7 +218,7 @@ def benchmark_models(dataset_name, X, y, X_test, y_test, baam_model_string, ct=N
     baam = Pipeline([
         ('ct', ct),
         # n_estimators updated from 10 to 100 due to sci-kit defaults changing in future versions
-        ('baam', MotherNetAdditiveClassifier(device='cpu', path=model_path)),
+        ('baam', GAMformerClassifier(device='cpu', path=model_path)),
     ])
     record = process_model(
         baam, 'baam',

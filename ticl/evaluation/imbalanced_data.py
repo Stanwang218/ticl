@@ -15,7 +15,7 @@ from sklearn.preprocessing import OrdinalEncoder, FunctionTransformer
 from sklearn.utils import resample
 
 from benchmark_node_gam_datasets import process_model
-from ticl.prediction import MotherNetAdditiveClassifier
+from ticl.prediction import GAMformerClassifier
 from ticl.utils import get_mn_model
 
 plt.style.use(['science', 'no-latex', 'light'])
@@ -41,10 +41,10 @@ def eval_gamformer_and_ebm(dataset_name, X, y, X_test, y_test, column_names, ct=
     baam = Pipeline([
         ('identity', FunctionTransformer()),
         # n_estimators updated from 10 to 100 due to sci-kit defaults changing in future versions
-        ('baam', MotherNetAdditiveClassifier(device='cpu', path=model_path)),
+        ('baam', GAMformerClassifier(device='cpu', path=model_path)),
     ])
     '''
-    baam = MotherNetAdditiveClassifier(device='cpu', path=model_path)
+    baam = GAMformerClassifier(device='cpu', path=model_path)
     record = process_model(
         baam, 'baam',
         X, y, X_test, y_test,

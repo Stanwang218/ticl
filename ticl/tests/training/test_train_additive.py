@@ -6,7 +6,7 @@ import torch
 
 from ticl.fit_model import main
 from ticl.models.mothernet_additive import MotherNetAdditive
-from ticl.prediction import MotherNetAdditiveClassifier
+from ticl.prediction import GAMformerClassifier
 
 from ticl.testing_utils import TESTING_DEFAULTS, TESTING_DEFAULTS_SHORT, count_parameters, check_predict_iris, get_model_path
 
@@ -18,7 +18,7 @@ def test_train_additive_old_defaults():
     L.seed_everything(0)
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(TESTING_DEFAULTS_ADDITIVE + ['-B', tmpdir, '--decoder-type', 'output_attention', '--seed-everything', 'False'])
-        clf = MotherNetAdditiveClassifier(device='cpu', path=get_model_path(results))
+        clf = GAMformerClassifier(device='cpu', path=get_model_path(results))
         check_predict_iris(clf)
     assert isinstance(results['model'], MotherNetAdditive)
     assert results['model_string'].startswith("additive_AFalse_decoderactivationrelu_d128_H128_Doutput_attention_e128_E10_rFalse_N4_n1_P64_L1_tFalse_cpu_")
@@ -30,7 +30,7 @@ def test_train_additive_nbins():
     L.seed_everything(0)
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(TESTING_DEFAULTS_ADDITIVE + ['-B', tmpdir, '--n-bins', '128', '--seed-everything', 'False'])
-        clf = MotherNetAdditiveClassifier(device='cpu', path=get_model_path(results))
+        clf = GAMformerClassifier(device='cpu', path=get_model_path(results))
         check_predict_iris(clf)
         assert clf.w_.shape == (4, 128, 3)
 
@@ -47,7 +47,7 @@ def test_train_additive_nbins():
 #     L.seed_everything(0)
 #     with tempfile.TemporaryDirectory() as tmpdir:
 #         results = main(TESTING_DEFAULTS_ADDITIVE + ['-B', tmpdir, '--validate', 'True'])
-#         clf = MotherNetAdditiveClassifier(device='cpu', path=get_model_path(results))
+#         clf = GAMformerClassifier(device='cpu', path=get_model_path(results))
 #         check_predict_iris(clf)
 #     assert isinstance(results['model'], MotherNetAdditive)
 #     assert count_parameters(results['model']) == 2192897
@@ -113,7 +113,7 @@ def test_train_additive_class_tokens():
     L.seed_everything(0)
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(TESTING_DEFAULTS_ADDITIVE + ['-B', tmpdir, '--decoder-type', 'class_tokens', '--seed-everything', 'False'])
-        clf = MotherNetAdditiveClassifier(device='cpu', path=get_model_path(results))
+        clf = GAMformerClassifier(device='cpu', path=get_model_path(results))
         check_predict_iris(clf)
     assert isinstance(results['model'], MotherNetAdditive)
     assert count_parameters(results['model']) == 2192897
@@ -124,7 +124,7 @@ def test_train_additive_class_average():
     L.seed_everything(0)
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(TESTING_DEFAULTS_ADDITIVE + ['-B', tmpdir, '--decoder-type', 'class_average', '--seed-everything', 'False'])
-        clf = MotherNetAdditiveClassifier(device='cpu', path=get_model_path(results))
+        clf = GAMformerClassifier(device='cpu', path=get_model_path(results))
         check_predict_iris(clf)
     assert isinstance(results['model'], MotherNetAdditive)
     assert count_parameters(results['model']) == 2192897
@@ -135,7 +135,7 @@ def test_train_additive_class_average_input_layer_norm():
     L.seed_everything(0)
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(TESTING_DEFAULTS_ADDITIVE + ['-B', tmpdir, '--decoder-type', 'class_average', '--input-layer-norm', 'True', '--seed-everything', 'False'])
-        clf = MotherNetAdditiveClassifier(device='cpu', path=get_model_path(results))
+        clf = GAMformerClassifier(device='cpu', path=get_model_path(results))
         check_predict_iris(clf)
     assert isinstance(results['model'], MotherNetAdditive)
     assert count_parameters(results['model']) == 2205697
@@ -146,7 +146,7 @@ def test_train_additive_input_bin_embedding():
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(TESTING_DEFAULTS_SHORT_ADDITIVE + ['-B', tmpdir, '--input-bin-embedding', 'True', '--decoder-type', 'output_attention'])
-        clf = MotherNetAdditiveClassifier(device='cpu', path=get_model_path(results))
+        clf = GAMformerClassifier(device='cpu', path=get_model_path(results))
         check_predict_iris(clf)
     assert isinstance(results['model'], MotherNetAdditive)
     assert results['model'].encoder.embedding.shape == (64, 16)
@@ -158,7 +158,7 @@ def test_train_additive_variable_features():
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(TESTING_DEFAULTS_SHORT_ADDITIVE + ['-B', tmpdir, '--num-features', '10'])
-        clf = MotherNetAdditiveClassifier(device='cpu', path=get_model_path(results))
+        clf = GAMformerClassifier(device='cpu', path=get_model_path(results))
         check_predict_iris(clf)
     assert isinstance(results['model'], MotherNetAdditive)
     assert results['model'].encoder[1].weight.shape == (128, 640)
@@ -170,7 +170,7 @@ def test_train_additive_special_token_simple():
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(TESTING_DEFAULTS_SHORT_ADDITIVE + ['-B', tmpdir, '--decoder-type', 'special_token_simple'])
-        clf = MotherNetAdditiveClassifier(device='cpu', path=get_model_path(results))
+        clf = GAMformerClassifier(device='cpu', path=get_model_path(results))
         check_predict_iris(clf)
     assert isinstance(results['model'], MotherNetAdditive)
     assert count_parameters(results['model']) == 9624586
@@ -204,7 +204,7 @@ def test_train_additive_factorized_output():
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(TESTING_DEFAULTS_SHORT_ADDITIVE + ['-B', tmpdir, '--factorized-output', 'True',
                                                           '--decoder-type', 'output_attention'])
-        clf = MotherNetAdditiveClassifier(device='cpu', path=get_model_path(results))
+        clf = GAMformerClassifier(device='cpu', path=get_model_path(results))
         check_predict_iris(clf)
     assert isinstance(results['model'], MotherNetAdditive)
     assert results['model'].decoder.output_weights.shape == (16, 64, 10)

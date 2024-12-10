@@ -582,7 +582,7 @@ def validate_model(model, config):
     from ticl.models.tabpfn import TabPFN
     from ticl.models.perceiver import TabPerceiver
     from ticl.models.biattention_tabpfn import BiAttentionTabPFN
-    from ticl.prediction import MotherNetAdditiveClassifier, MotherNetClassifier, TabPFNClassifier, MotherNetAdditiveRegressor 
+    from ticl.prediction import GAMformerClassifier, MotherNetClassifier, TabPFNClassifier, GAMformerRegressor 
     from ticl.evaluation.tabular_evaluation import eval_on_datasets
     from ticl.evaluation import tabular_metrics
     from uuid import uuid4
@@ -614,7 +614,7 @@ def validate_model(model, config):
         )
 
         if isinstance(model, (GAMformer, MotherNetAdditive)):
-            clf = MotherNetAdditiveClassifier(
+            clf = GAMformerClassifier(
                 device=config['device'], 
                 model=model, 
                 config=config
@@ -663,7 +663,7 @@ def validate_model(model, config):
             num_feats=100, return_capped=False, classification=False)
 
         if isinstance(model, (GAMformer, MotherNetAdditive)):
-            clf = MotherNetAdditiveRegressor(device=config['device'], model=model, config=config)
+            clf = GAMformerRegressor(device=config['device'], model=model, config=config)
         else:
             raise ValueError(f"Model {model} not supported for validation")
         base_path = 'models_diff/validation'

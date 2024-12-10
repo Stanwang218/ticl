@@ -21,7 +21,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import BaggingClassifier
 from ticl.prediction.mothernet import ShiftClassifier, EnsembleMeta, MotherNetClassifier
 from sklearn.impute import SimpleImputer
-from ticl.prediction.mothernet_additive import MotherNetAdditiveClassifier
+from ticl.prediction.mothernet_additive import GAMformerClassifier
 
 from interpret.glassbox import ExplainableBoostingClassifier
 
