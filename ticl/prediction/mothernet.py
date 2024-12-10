@@ -5,13 +5,9 @@ import numpy as np
 import torch
 from einops import rearrange, repeat
 from sklearn.base import BaseEstimator, ClassifierMixin, clone
-from sklearn.ensemble import VotingClassifier
-from sklearn.feature_selection import VarianceThreshold
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import LabelEncoder, PowerTransformer, StandardScaler, OneHotEncoder, QuantileTransformer
-from sklearn.impute import SimpleImputer
+
+from sklearn.preprocessing import LabelEncoder, StandardScaler, OneHotEncoder, QuantileTransformer
 from sklearn.feature_selection import SelectKBest
-from sklearn.compose import make_column_transformer
 
 from ticl.model_builder import load_model
 from ticl.utils import normalize_by_used_features_f, normalize_data, get_mn_model
