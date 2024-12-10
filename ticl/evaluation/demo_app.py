@@ -13,7 +13,7 @@ import pandas as pd
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import make_column_transformer
-from ticl.prediction.mothernet_additive import GAMformerClassifier
+from ticl.prediction.gamformer import GAMformerClassifier
 from interpret.glassbox import ExplainableBoostingClassifier
 
 

@@ -34,7 +34,7 @@ set_config(skip_parameter_validation=True, assume_finite=True)
 
 from ticl.evaluation.tabular_evaluation import eval_on_datasets
 from ticl.prediction.mothernet import ShiftClassifier, EnsembleMeta, MotherNetClassifier, MotherNetInitMLPClassifier
-from ticl.prediction.mothernet_additive import GAMformerClassifier
+from ticl.prediction.gamformer import GAMformerClassifier
 from ticl.evaluation.baselines.distill_mlp import DistilledTabPFNMLP
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler

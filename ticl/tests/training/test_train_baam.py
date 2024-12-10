@@ -5,7 +5,7 @@ import pytest
 
 from ticl.fit_model import main
 from ticl.models.gamformer import GAMformer
-from ticl.prediction.mothernet_additive import GAMformerClassifier, GAMformerRegressor
+from ticl.prediction.gamformer import GAMformerClassifier, GAMformerRegressor
 
 from ticl.testing_utils import count_parameters, check_predict_iris, get_model_path, check_predict_linear
 from ticl.models import encoders

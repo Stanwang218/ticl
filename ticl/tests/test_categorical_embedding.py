@@ -3,7 +3,7 @@ import torch
 import pytest
 import lightning as L
 
-from ticl.models.biattention_additive_mothernet import _determine_is_categorical
+from ticl.models.gamformer import _determine_is_categorical
 
 
 def test_categorical_embedding():
