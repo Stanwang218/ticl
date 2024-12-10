@@ -31,7 +31,7 @@ def _determine_is_categorical(x_src: torch.Tensor, info: dict) -> torch.Tensor:
         return is_categorical.to(torch.float32)
 
 
-class BiAttentionMotherNetAdditive(nn.Module):
+class GAMformer(nn.Module):
     def __init__(self, *, n_features, n_out, emsize, nhead, nhid_factor, nlayers, dropout=0.0, y_encoder_layer=None,
                  input_normalization=False, init_method=None, pre_norm=False,
                  activation='gelu', recompute_attn=False, categorical_embedding=False,

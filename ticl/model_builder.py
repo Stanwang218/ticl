@@ -12,7 +12,7 @@ from ticl.models.mothernet_additive import MotherNetAdditive
 from ticl.models.perceiver import TabPerceiver
 from ticl.models.tabpfn import TabPFN
 from ticl.models.biattention_tabpfn import BiAttentionTabPFN
-from ticl.models.biattention_additive_mothernet import BiAttentionMotherNetAdditive
+from ticl.models.gamformer import GAMformer
 from ticl.models.mothernet import MotherNet
 from ticl.config_utils import nested_dict
 
@@ -249,7 +249,7 @@ def get_model(
     elif model_type == "baam":
         # FIXME hack
         config['transformer']['nhead'] = 4
-        model = BiAttentionMotherNetAdditive(
+        model = GAMformer(
             n_out=n_out, n_features=config['prior']['num_features'],
             y_encoder_layer=y_encoder, **config['transformer'], **config['mothernet'], **config['additive'])
     elif model_type == 'ssm_tabpfn':

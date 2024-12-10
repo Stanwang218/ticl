@@ -574,7 +574,7 @@ def get_init_method(init_method):
 def validate_model(model, config):
     from ticl.datasets import load_openml_list, open_cc_valid_dids, open_cc_valid_dids_regression, open_cc_large_dids, new_valid_dids
 
-    from ticl.models.biattention_additive_mothernet import BiAttentionMotherNetAdditive
+    from ticl.models.gamformer import GAMformer
     from ticl.models.mothernet_additive import MotherNetAdditive
     from ticl.models.mothernet import MotherNet
     from ticl.models.ssm_mothernet import SSMMotherNet
@@ -613,7 +613,7 @@ def validate_model(model, config):
             classification=True,
         )
 
-        if isinstance(model, (BiAttentionMotherNetAdditive, MotherNetAdditive)):
+        if isinstance(model, (GAMformer, MotherNetAdditive)):
             clf = MotherNetAdditiveClassifier(
                 device=config['device'], 
                 model=model, 
@@ -662,7 +662,7 @@ def validate_model(model, config):
             open_cc_valid_dids_regression, multiclass=False, shuffled=True, filter_for_nan=False, max_samples=10000,
             num_feats=100, return_capped=False, classification=False)
 
-        if isinstance(model, (BiAttentionMotherNetAdditive, MotherNetAdditive)):
+        if isinstance(model, (GAMformer, MotherNetAdditive)):
             clf = MotherNetAdditiveRegressor(device=config['device'], model=model, config=config)
         else:
             raise ValueError(f"Model {model} not supported for validation")
