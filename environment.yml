@@ -1,4 +1,4 @@
-name: mothernet
+name: ticl
 channels:
   - conda-forge
   - defaults

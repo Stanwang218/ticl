@@ -15,6 +15,11 @@ It's recommended to use conda to create an environment using the provided enviro
 ```
 conda create -f environment.yml
 ```
+Then install the package:
+```
+conda activate ticl
+pip install -e .
+```
 # MotherNet
 
 ## Getting started
