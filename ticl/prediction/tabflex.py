@@ -63,6 +63,6 @@ class TabFlex:
 
         return [], []
 
-    def predict_helper(self, X):
+    def predict(self, X):
         y = self.model.predict(X)
         return y
