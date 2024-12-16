@@ -5,11 +5,17 @@ This repository contains code for training and prediction of several models for 
 **GAMformer** is a model trained to output an interpretable, additive model using in-context learning.
 **TabFlex** is a extension of ``TabPFN``  using linear attention that overcomes the scaling limitations of ``TabPFN`` in terms of features, models and number of classes.
 
+- [MotherNet](#MotherNet)
+- [GAMformer](#GAMformer)
+- [TabFlex](#TabFlex)
+
 Both the architecture and the code in this repository is based on the [TabPFN](https://github.com/automl/TabPFN) by the [Freiburg AutoML group](https://www.automl.org/).
 
 The repository includes code for training and prediction with these models, as well as links to checkpoints for the models used in our publications.
 
 All models provided are research prototypes, shared for research use, and not meant for real-world applications. Responsibility for using the models contained in this repository, as well monitoring and assessing potential impact of the models lies with the user of the code.
+
+# MotherNet
 
 ## Installation
 
@@ -23,7 +29,6 @@ Then install the package:
 conda activate ticl
 pip install -e .
 ```
-# MotherNet
 
 ## Getting started
 
@@ -63,6 +68,11 @@ Full model training code is provided. Training ``MotherNet`` is possible with ``
 The results in the paper correspond to ``python fit_model.py mothernet -L 2``, though default values might change and no longer reflect the values in the paper.
 Data-parallel Multi-GPU training is in principal supported using ``torchrun``.
 By default, experiments are tracked using MLFlow if the ``MLFLOW_HOSTNAME`` environment variable is set. 
+
+## Papers
+This work is described in [MotherNet: A Foundational Hypernetwork for Tabular Classification](https://arxiv.org/pdf/2312.08598).
+Please cite that work when using this code. As this work rests on the TabPFN work, I would suggest you also cite their [paper](https://arxiv.org/abs/2207.01848),
+which also provides more background on the methodology.
 
 # GAMformer
 
@@ -140,11 +150,6 @@ To evaluate TabFlex on various datasets, use [TabZilla](https://github.com/yzeng
 
 ---
 
-
-## Papers
-This work is described in [MotherNet: A Foundational Hypernetwork for Tabular Classification](https://arxiv.org/pdf/2312.08598).
-Please cite that work when using this code. As this work rests on the TabPFN work, I would suggest you also cite their [paper](https://arxiv.org/abs/2207.01848),
-which also provides more background on the methodology.
 
 
 ## License
