@@ -70,7 +70,76 @@ WIP
 
 # TabFlex
 
-WIP
+Recent advances in the field of in-context learning (ICL) have demonstrated impressive performance for tabular classification, exemplified by TabPFN's success on small datasets. However, the quadratic complexity of the attention mechanism limits its applicability to larger datasets. To address this issue, we conduct a comprehensive comparison of popular scalable attention alternatives, including state-space models (SSMs) and linear attention mechanisms, revealing that the inherent causality of SSMs hinders ICL performance for large datasets, while linear attention preserves effectiveness. Leveraging these insights, we introduce TabFlex, a model based on linear attention that supports thousands of features and hundreds of classes, capable of handling datasets with millions of samples. Extensive experiments demonstrate that TabFlex is significantly faster than most existing methods while achieving top-two performance on small datasets among 25 baselines, with a 2xspeedup over TabPFN and a 1.5xspeedup over XGBoost. On large datasets, TabFlex remains efficient (e.g., approximately 5 seconds on the poker-hand dataset, which consists of millions of samples), while achieving relatively solid performance.
+
+---
+
+## **Step 1: Install Environment for TabFlex**
+
+Follow these steps to set up the required environment:
+
+1. Create the Conda environment using the provided file:
+   ```bash
+   conda create -f tabflex_conda.yml
+   ```
+2. Clone and install dependencies:
+   ```bash
+   git clone https://github.com/microsoft/ticl
+   git clone https://github.com/yzeng58/fast-transformers
+   cd fast-transformers
+   pip install -e .
+   cd ../ticl
+   pip install -e .
+   ```
+
+---
+
+## **Step 2: Model Inference**
+
+Below is an example of using TabFlex for logistic classification.
+
+```python
+from ticl.prediction.tabflex import TabFlex
+import torch
+
+# Generate synthetic dataset
+X_train = torch.randn(300, 20)
+coef = torch.randn(20) 
+y_train = (X_train @ coef > 0).int()
+
+X_test = torch.randn(50, 20)
+y_test = (X_test @ coef > 0).int()
+
+# Initialize and train TabFlex model
+tabflex = TabFlex()
+tabflex.fit(X_train, y_train)
+
+# Make predictions
+y_pred = tabflex.predict(X_test)
+
+# Evaluate performance
+acc = (torch.tensor(y_pred) == y_test).float().mean().item()
+print(f"Accuracy: {acc:.4f}")
+```
+
+---
+
+## **Step 3: Test TabFlex on Different Datasets**
+
+To evaluate TabFlex on various datasets, use [TabZilla](https://github.com/yzeng58/tabzilla). Follow these steps:
+
+1. Clone the TabZilla repository:
+   ```bash
+   git clone https://github.com/yzeng58/tabzilla
+   ```
+2. Follow the instructions in the TabZilla README.  
+   - When specifying the `--model_name` parameter, set it to `tabflex`:
+     ```bash
+     --model_name tabflex
+     ```
+
+---
+
 
 ## Papers
 This work is described in [MotherNet: A Foundational Hypernetwork for Tabular Classification](https://arxiv.org/pdf/2312.08598).
