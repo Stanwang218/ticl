@@ -1,10 +1,15 @@
-# MotherNet
+# ticl - Tabular In-Context Learning
 
-The MotherNet is a hypernetwork foundational model (or conditional neural process) for tabular data classification.
-Both the architecture and the code is based on the [TabPFN](https://github.com/automl/TabPFN) by the [Freiburg AutoML group](https://www.automl.org/).
+This repository contains code for training and prediction of several models for tabular in-context learning, including **MotherNet**, **GAMformer** and **TabFlex**.
+**MotherNet** is a hypernetwork foundational model (or conditional neural process) for tabular data classification that creates a small neural network.
+**GAMformer** is a model trained to output an interpretable, additive model using in-context learning.
+**TabFlex** is a extension of ``TabPFN``  using linear attention that overcomes the scaling limitations of ``TabPFN`` in terms of features, models and number of classes.
 
-This is a research prototype, shared for research use, and not meant for real-world applications. Responsibility for using the models contained in this repository,
-as well monitoring and assessing potential impact of the models lies with the user of the code.
+Both the architecture and the code in this repository is based on the [TabPFN](https://github.com/automl/TabPFN) by the [Freiburg AutoML group](https://www.automl.org/).
+
+The repository includes code for training and prediction with these models, as well as links to checkpoints for the models used in our publications.
+
+All models provided are research prototypes, shared for research use, and not meant for real-world applications. Responsibility for using the models contained in this repository, as well monitoring and assessing potential impact of the models lies with the user of the code.
 
 ## Installation
 
@@ -13,23 +18,30 @@ It's recommended to use conda to create an environment using the provided enviro
 ```
 conda create -f environment.yml
 ```
+Then install the package:
+```
+conda activate ticl
+pip install -e .
+```
+# MotherNet
 
 ## Getting started
 
-A simple usage of our sklearn interface is:
+A simple usage of the MotherNet sklearn interface is:
 ```python
 from sklearn.metrics import accuracy_score
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 
-from mothernet.prediction import MotherNetClassifier, EnsembleMeta
+from ticl.prediction import MotherNetClassifier, EnsembleMeta
 
 X, y = load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 
 # MotherNetClassifier encapsulates a single instantiation of the model.
+# This will automatically download a model from blob storage
 
-classifier = MotherNetClassifier(device='cpu', model_path="path/to/model.pkl")
+classifier = MotherNetClassifier(device='cpu')
 
 classifier.fit(X_train, y_train)
 y_eval, p_eval = classifier.predict(X_test, return_winning_probability=True)
@@ -50,12 +62,21 @@ Scaling of features is handled internally.
 Full model training code is provided. Training ``MotherNet`` is possible with ``python fit_model.py mothernet``. A GPU ID can be specified with ``-g GPU_ID``. See the ``python fit_model.py mothernet -h`` and ``python fit_model.py -h`` for more options.
 The results in the paper correspond to ``python fit_model.py mothernet -L 2``, though default values might change and no longer reflect the values in the paper.
 Data-parallel Multi-GPU training is in principal supported using ``torchrun``.
-By default, experiments are tracked using MLFlow if the ``MLFLOW_HOSTNAME`` environment variable is set. Using MLFlow for a particular run can be disabled with the ``--no-mlflow`` argument.
+By default, experiments are tracked using MLFlow if the ``MLFLOW_HOSTNAME`` environment variable is set. 
+
+# GAMformer
+
+WIP
+
+# TabFlex
+
+WIP
 
 ## Papers
 This work is described in [MotherNet: A Foundational Hypernetwork for Tabular Classification](https://arxiv.org/pdf/2312.08598).
 Please cite that work when using this code. As this work rests on the TabPFN work, I would suggest you also cite their [paper](https://arxiv.org/abs/2207.01848),
 which also provides more background on the methodology.
+
 
 ## License
 Copyright 2022 Noah Hollmann, Samuel Müller, Katharina Eggensperger, Frank Hutter
