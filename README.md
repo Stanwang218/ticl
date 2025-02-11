@@ -90,11 +90,11 @@ Follow these steps to set up the required environment:
 
 1. Create the Conda environment using the provided file:
    ```bash
-   conda create -f tabflex_conda.yml
+   git clone https://github.com/microsoft/ticl
+   conda env create -f ticl/tabflex_conda.yaml
    ```
 2. Clone and install dependencies:
    ```bash
-   git clone https://github.com/microsoft/ticl
    git clone https://github.com/yzeng58/fast-transformers
    cd fast-transformers
    pip install -e .

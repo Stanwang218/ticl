@@ -19,7 +19,7 @@ from xgboost import XGBClassifier
 
 from ticl.evaluation.node_gam_data import DATASETS
 from ticl.prediction import GAMformerClassifier
-from ticl.utils import get_mn_model
+from ticl.utils import fetch_model
 
 
 class PyGAMSklearnWrapper:
@@ -214,7 +214,7 @@ def benchmark_models(dataset_name, X, y, X_test, y_test, baam_model_string, ct=N
 
     # No pipeline for BAAM
     model_string = baam_model_string
-    model_path = get_mn_model(model_string)
+    model_path = fetch_model(model_string)
     baam = Pipeline([
         ('ct', ct),
         # n_estimators updated from 10 to 100 due to sci-kit defaults changing in future versions

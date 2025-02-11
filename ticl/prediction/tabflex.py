@@ -3,13 +3,19 @@ from ticl.prediction.tabpfn import TabPFNClassifier
 import numpy as np
 import pdb
 import torch
-torch.set_num_threads(1)
+from ticl.utils import fetch_model
+
 
 class TabFlex:
     def __init__(
         self,
         max_n_training_samples = 100000000000,
     ):
+        torch.set_num_threads(1)
+        fetch_model('ssm_tabpfn_b4_maxnumclasses100_modellinear_attention_numfeatures1000_n1024_validdatanew_warm_08_23_2024_19_25_40_epoch_3140.cpkt')
+        fetch_model('ssm_tabpfn_b4_largedatasetTrue_modellinear_attention_nsamples50000_08_01_2024_22_05_50_epoch_110.cpkt')
+        fetch_model('ssm_tabpfn_modellinear_attention_08_28_2024_19_00_44_epoch_3110.cpkt')
+
 
         self.tabflexh1k = TabPFNClassifier(
             device='cuda', 

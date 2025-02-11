@@ -25,7 +25,7 @@ class DownloadProgressBar(tqdm):
         self.update(b * bsize - self.n)
 
 
-def get_mn_model(file_name):
+def fetch_model(file_name):
     model_path = Path(get_module_path()) / 'models_diff' / file_name
     if not model_path.exists():
         url = f'https://amuellermothernet.blob.core.windows.net/models/{file_name}'

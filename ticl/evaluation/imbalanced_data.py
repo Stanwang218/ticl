@@ -16,7 +16,7 @@ from sklearn.utils import resample
 
 from benchmark_node_gam_datasets import process_model
 from ticl.prediction import GAMformerClassifier
-from ticl.utils import get_mn_model
+from ticl.utils import fetch_model
 
 plt.style.use(['science', 'no-latex', 'light'])
 
@@ -36,7 +36,7 @@ def eval_gamformer_and_ebm(dataset_name, X, y, X_test, y_test, column_names, ct=
     records.append(record)
     # No pipeline for BAAM
     model_string = "baam_nsamples500_numfeatures10_04_07_2024_17_04_53_epoch_1780.cpkt"
-    model_path = get_mn_model(model_string)
+    model_path = fetch_model(model_string)
     '''
     baam = Pipeline([
         ('identity', FunctionTransformer()),
