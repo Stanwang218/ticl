@@ -93,7 +93,8 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         scale=True, 
         epoch=-1, 
         model=None, 
-        config=None
+        config=None,
+        max_num_train_samples = np.inf,
     ):
         """
         Initializes the classifier and loads the model.
@@ -144,6 +145,7 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         self.scale = scale
         self.model = model
         self.config = config
+        self.max_num_train_samples = max_num_train_samples
 
         assert self.no_preprocess_mode if not self.no_grad else True, \
             "If no_grad is false, no_preprocess_mode must be true, because otherwise no gradient can be computed."
@@ -166,15 +168,22 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         self.classes_ = cls
         return np.asarray(y, dtype=np.float64, order="C")
     
-    def preprocess(self, X, y, overwrite_warning=False):
-        self.features_mode, self.classes_mode = 'full', 'full'
-
+    def preprocess(self, X, y, overwrite_warning = False, dimension_reduction='random'):
+        self.classes_mode = 'full'
+        self.dimension_reduction = dimension_reduction
+        
         if X.shape[1] > self.max_num_features:
             Warning("The number of features for this classifier is restricted to ", self.max_num_features)
             print('Only randomly take ', self.max_num_features, ' features.')
-            feature_selected = np.random.choice(X.shape[1], self.max_num_features, replace=False)
-            X = X[:, feature_selected]
-            self.features_mode = 'cropped'
+
+            if self.dimension_reduction == 'random':
+                self.feature_selected = np.random.choice(X.shape[1], self.max_num_features, replace=False)
+                X = X[:, self.feature_selected]
+
+            elif self.dimension_reduction == 'random_proj':
+                self.random_proj = torch.nn.Linear(X.shape[1], self.max_num_features, bias=False, device=self.device)
+                with torch.no_grad():
+                    X = self.random_proj(torch.tensor(X, device=self.device)).cpu().numpy()
             
         if len(np.unique(y)) > self.max_num_classes:
             Warning("The number of classes for this classifier is restricted to ", self.max_num_classes)
@@ -192,13 +201,16 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
             self.label_encoder3.fit(y[y<0])
             # y[y<0] = self.label_encoder3.transform(y[y<0]) + self.max_num_classes - 1
             y[y<0] = self.max_num_classes - 1
-            self.classes_mode = 'cropped'
+            self.classes_mode = 'croped'
             
-        if X.shape[0] > 1024 and not overwrite_warning:
+        if X.shape[0] > self.max_num_train_samples and not overwrite_warning:
             Warning("⚠️ WARNING: TabPFN is not made for datasets with a trainingsize > 1024. Prediction might take a while, be less reliable."
                              "We advise not to run datasets > 10k samples, which might lead to your machine crashing "
                              "(due to quadratic memory scaling of TabPFN)."
                              "Please confirm you want to run by passing overwrite_warning=True to the fit function.")
+            selected_samples = np.random.choice(X.shape[0], self.max_num_train_samples, replace=False)
+            X = X[selected_samples]
+            y = y[selected_samples]
 
         self.X_ = X
         self.y_ = y
@@ -261,8 +273,12 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         # Input validation
         if self.no_grad:
             X = check_array(X, force_all_finite=False)
-            if self.features_mode == 'cropped':
-                X = X[:, :self.max_num_features]
+            if X.shape[1] > self.max_num_features:      
+                if self.dimension_reduction == 'random':
+                    X = X[:, self.feature_selected]
+                elif self.dimension_reduction == 'random_proj':
+                    with torch.no_grad():
+                        X = self.random_proj(torch.tensor(X, device=self.device)).cpu().numpy()
             X_full = np.concatenate([self.X_, X], axis=0)
             X_full = torch.tensor(X_full, device=self.device).float().unsqueeze(1)
         else:
@@ -303,7 +319,7 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         )
         
         # add zeros to make the dimension same as the number of classes
-        if self.classes_mode == 'cropped':
+        if self.classes_mode == 'croped':
             prediction = torch.cat(
                 [
                     prediction, 
