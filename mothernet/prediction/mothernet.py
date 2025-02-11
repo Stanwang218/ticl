@@ -410,7 +410,8 @@ class EnsembleMeta(ClassifierMixin, BaseEstimator):
             X_cat = None
 
         if X_cont.shape[1] > 0:
-            self.quantile_ = QuantileTransformer()
+            n_quantiles = min(1000, X_cont.shape[1])
+            self.quantile_ = QuantileTransformer(n_quantiles=n_quantiles)
             X_cont_quantile = self.quantile_.fit_transform(X_cont)
 
         self.estimators_ = []
