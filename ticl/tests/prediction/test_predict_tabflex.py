@@ -35,6 +35,6 @@ def test_predict_tabflex(n_samples, n_features):
     if n_features < 1000:
         assert acc > 0.9
     elif n_samples >= 3000:
-        assert acc > 0.75
+        assert acc > 0.85
     else:
         assert acc > 0.4   # hm this is not good
