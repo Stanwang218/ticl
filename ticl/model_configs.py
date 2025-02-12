@@ -64,7 +64,7 @@ def get_ssm_config():
         'input_normalization': False,
         'tabpfn_zero_weights': True,
         'all_layers_same_init': True,
-        'model': 'mamba1',
+        'model': 'linear_attention',
         'causal_mask': False,
         'feature_map': 'identity',
         'norm_output': False,
@@ -267,11 +267,11 @@ def get_batabpfn_default_config():
     config['prior']['classification']['pad_zeros'] = False
     return config
 
-def get_ssm_tabpfn_default_config(model = 'mamba1'):
+def get_ssm_tabpfn_default_config():
     config = get_shared_defaults(encoder_type='ssm')
     return config
 
-def get_ssm_mothernet_default_config(model = 'mamba1'):
+def get_ssm_mothernet_default_config():
     config = get_shared_defaults(encoder_type='ssm')
     config.update(get_mothernet_config())
     return config

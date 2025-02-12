@@ -85,7 +85,6 @@ class SSMTabPFN(nn.Module):
         else:
             x_src, y_src = src
         
-        if self.model == 'mamba1': x_src = x_src.contiguous()
         x_src = self.encoder(x_src) # transform n_features to emsize
         # transform y as one-hot encoding into emsize
         y_src = self.y_encoder(y_src.unsqueeze(-1) if len(y_src.shape) < len(x_src.shape) else y_src)
@@ -106,7 +105,7 @@ class SSMTabPFN(nn.Module):
             src = self.input_ln(src)
             
         # output = self.ssm(src, src_mask)
-        if self.model in ['linear_attention', 'mamba1', 'mamba2']:
+        if self.model in ['linear_attention']:
             output = self.ssm(src, src_mask)
         elif self.model in ['fla']:
             output = self.ssm(src, src_mask, is_causal = self.causal_mask)

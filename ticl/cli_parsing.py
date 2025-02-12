@@ -130,7 +130,7 @@ def argparser_from_config(parser, description="Train Mothernet"):
         ssm.add_argument('--tabpfn-zero-weights', help='Whether to use zeroing of weights from tabpfn code.', type=str2bool)
         ssm.add_argument('--pre-norm', action='store_true')
         ssm.add_argument('--classification-task', type=str2bool, help='Whether to use classification or regression.')
-        ssm.add_argument('--model', type = str, choices = ['mamba1', 'mamba2', 'linear_attention', 'fla'], help = 'which ssm model to use')
+        ssm.add_argument('--model', type = str, choices = ['linear_attention', 'fla'], help = 'which ssm model to use')
         
         ## specific to fla
         ssm.add_argument('--feature-map', help='when the model is fla, which feature map to use', type = str, choices = ['identity', 'elu'])

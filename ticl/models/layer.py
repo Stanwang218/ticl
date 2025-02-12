@@ -246,7 +246,7 @@ def get_ssm_layers(
     d_model: int,
     n_layer: int,
     d_intermediate: int,
-    model = 'mamba1',
+    model = 'linear_attention',
     ssm_cfg=None,
     attn_layer_idx=None,
     attn_cfg=None,
@@ -268,33 +268,7 @@ def get_ssm_layers(
 ):
     if dtype is None:
         dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
-    if 'mamba' in model:
-        from ticl.models.mamba import MambaLayer
-        if ssm_cfg is None:
-            ssm_cfg = {
-                'layer': model[0].upper()+model[1:].lower(),
-            }
-        else:
-            ssm_cfg = {
-                'layer': model[0].upper()+model[1:].lower(), 
-                **ssm_cfg,
-            }
-        return MambaLayer(
-            d_model,
-            n_layer,
-            d_intermediate,
-            ssm_cfg=ssm_cfg,
-            attn_layer_idx=attn_layer_idx,
-            attn_cfg=attn_cfg,
-            norm_epsilon=norm_epsilon,
-            rms_norm=rms_norm,
-            initializer_cfg=initializer_cfg,
-            fused_add_norm=fused_add_norm,
-            residual_in_fp32=residual_in_fp32,
-            device=device,
-            dtype=dtype,
-        )
-    elif model == 'linear_attention':
+    if model == 'linear_attention':
         from ticl.models.linear_attention import TransformerEncoderBuilder
 
         if d_model % nheads != 0:
