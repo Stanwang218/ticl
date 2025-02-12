@@ -47,13 +47,13 @@ class TabFlex:
                 self.model = self.tabflexh1k
             else:
                 self.model.fit(X, y, overwrite_warning=True, dimension_reduction='random_proj')
-                return [], []
+                return self
         else:
             self.model = self.tabflexs100
 
         self.model.fit(X, y, overwrite_warning=True)
 
-        return [], []
+        return self
 
     def predict(self, X):
         y = self.model.predict(X)
