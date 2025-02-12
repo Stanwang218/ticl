@@ -562,12 +562,12 @@ def transformer_predict(
                                     message="torch.cuda.amp.autocast only affects CUDA ops, but CUDA is not available.  Disabling.")
             if device == 'cpu':
                 output_batch = checkpoint(predict, batch_input, batch_label, softmax_temperature,
-                                          True,  model, eval_position, num_classes, inference_mode, no_grad)
+                                          True,  model, eval_position, num_classes, inference_mode, no_grad, use_reentrant=False)
 
             else:
                 with torch.cuda.amp.autocast(enabled=fp16_inference):
                     output_batch = checkpoint(predict, batch_input, batch_label, softmax_temperature,
-                                              True, model, eval_position, num_classes, inference_mode, no_grad)
+                                              True, model, eval_position, num_classes, inference_mode, no_grad, use_reentrant=False)
         outputs += [output_batch]
 
     outputs = torch.cat(outputs, 1)

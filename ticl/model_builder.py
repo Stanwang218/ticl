@@ -50,7 +50,7 @@ def get_gpu_memory():
 
 @cache
 def load_model(path, device, verbose=False):
-    states = torch.load(path, map_location='cpu')
+    states = torch.load(path, map_location='cpu', weights_only=False)
     model_state = states[0]
     config_sample = states[-1]
     if 'y_encoder' not in config_sample and 'onehot' in str(path):

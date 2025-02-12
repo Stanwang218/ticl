@@ -214,6 +214,7 @@ class TransformerEncoderLayer(Module):
                     src_mask,
                     True,
                     is_causal,
+                    use_reentrant=True,
                 )[0]
             else:
                 src2 = self.self_attn(
