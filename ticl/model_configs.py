@@ -290,9 +290,9 @@ def get_model_default_config(model_type, model = None):
     elif model_type == 'perceiver':
         config = get_perceiver_default_config()
     elif model_type == 'ssm_tabpfn':
-        config = get_ssm_tabpfn_default_config(model = model)
+        config = get_ssm_tabpfn_default_config()
     elif model_type == 'ssm_mothernet':
-        config = get_ssm_mothernet_default_config(model = model)
+        config = get_ssm_mothernet_default_config()
     else:
         raise ValueError(f"Unknown model type {model_type}")
     config['model_type'] = model_type
