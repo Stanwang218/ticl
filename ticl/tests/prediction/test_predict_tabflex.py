@@ -10,7 +10,7 @@ def set_threads():
 
 
 # Test TabFlex prediction on synthetic data
-# tabpflexs100, tabflexl100, tabflexh1k, tabflexh1k, error?
+# tabpflexs100, tabflexl100, tabflexh1k, tabflexh1k, tabflexl100 w random projection
 @pytest.mark.parametrize("n_samples, n_features", [(300, 20), (3000, 100), (3000, 101), (300, 1000), (300, 1001)])
 def test_predict_tabflex(n_samples, n_features):
     L.seed_everything(42)

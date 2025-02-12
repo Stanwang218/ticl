@@ -174,13 +174,14 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         
         if X.shape[1] > self.max_num_features:
             Warning("The number of features for this classifier is restricted to ", self.max_num_features)
-            print('Only randomly take ', self.max_num_features, ' features.')
 
             if self.dimension_reduction == 'random':
+                print('Only randomly take ', self.max_num_features, ' features.')
                 self.feature_selected = np.random.choice(X.shape[1], self.max_num_features, replace=False)
                 X = X[:, self.feature_selected]
 
             elif self.dimension_reduction == 'random_proj':
+                print('Random projection to ', self.max_num_features, ' features.')
                 self.random_proj = torch.nn.Linear(X.shape[1], self.max_num_features, bias=False, device=self.device)
                 with torch.no_grad():
                     X = self.random_proj(torch.tensor(X, device=self.device)).cpu().numpy()

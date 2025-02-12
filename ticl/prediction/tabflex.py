@@ -46,7 +46,9 @@ class TabFlex:
             if D <= 1000:
                 self.model = self.tabflexh1k
             else:
-                self.model.fit(X, y, overwrite_warning=True, dimension_reduction='random_proj')
+                self.model = self.tabflexl100
+                self.model.dimension_reduction = 'random_proj'
+                self.model.fit(X, y, overwrite_warning=True)
                 return self
         else:
             self.model = self.tabflexs100
