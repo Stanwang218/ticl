@@ -37,7 +37,7 @@ def _check_file(e, base_path, add_name, eval_addition, verbose):
             print('We have to download the TabPFN, as there is no checkpoint at ', model_path)
             print('It has about 100MB, so this might take a moment.')
             import requests
-            url = 'https://github.com/automl/TabPFN/raw/main/tabpfn/models_diff/prior_diff_real_checkpoint_n_0_epoch_42.cpkt'
+            url = 'https://amuellermothernet.blob.core.windows.net/models/download_epoch_100.cpkt'
             r = requests.get(url, allow_redirects=True)
             os.makedirs(os.path.dirname(model_path), exist_ok=True)
             with open(model_path, 'wb') as f:
