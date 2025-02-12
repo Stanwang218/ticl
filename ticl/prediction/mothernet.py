@@ -227,7 +227,7 @@ class MotherNetClassifier(ClassifierMixin, BaseEstimator):
         self.config = config
 
         if path is None and model is None:
-            model_string = "mn_Dclass_average_03_25_2024_17_14_32_epoch_3970.pickle"
+            model_string = "mn_Dclass_average_03_25_2024_17_14_32_epoch_3970.cpkt"
             path = fetch_model(model_string)
         self.path = path
 
