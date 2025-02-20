@@ -54,7 +54,6 @@ def get_ssm_config():
             'd_state': 16,
             'expand': 1,
         },
-        'local_nhead': 4,
         'init_method': None,
         'recompute_attn': True,
         'pre_norm': False,
