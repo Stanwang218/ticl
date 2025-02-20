@@ -83,8 +83,6 @@ class TransformerEncoderLayer(Module):
         factory_kwargs = {'device': device, 'dtype': dtype}
         super().__init__()
 
-        if attn_name == 'fla': attn_name = 'flash_linear_attention'
-
         if (torch.__version__ >= '2.2.0') or (not attn_name in ['default', 'flash_attention']):
             if attn_name == 'default': attn_name = 'flash_attention'
             from ticl.models.flash_transformer import MultiheadAttention

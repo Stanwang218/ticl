@@ -168,49 +168,6 @@ class MultiheadAttention(Module):
 
         if attn_name == 'flash_attention':
             self.attn = scaled_dot_product_attention
-        elif attn_name == 'flash_linear_attention':
-            from fla.ops.linear_attn import chunk_linear_attn 
-            from fla.ops.linear_attn.chunk import normalize_output
-            def fla(q, k, v, dropout_p, is_causal = False, **kwargs): 
-                """
-                q: query tensor of shape (batch_size, num_head, seq_len_q, head_dim_qk) bhld
-                k: key tensor of shape (batch_size, num_head, seq_len_kv, head_dim_qk) bhnd
-                v: value tensor of shape (batch_size, num_head, seq_len_kv, head_dim_v) bhnm
-                attn_mask: not used here
-                """
-                if dropout_p != 0: raise ValueError("dropout_p must be 0 for fla_causal")
-
-                if is_causal:
-                    if q.size(-2) != k.size(-2): raise ValueError("q and k must have the same seq_len when applying causal mask!")
-                    return chunk_linear_attn(feature_transform(q), feature_transform(k), v, normalize = norm_output)[0]
-                else:
-                    scale = q.size(-1) ** -0.5
-
-                    kv = torch.einsum("bhnd,bhnm->bhdm", feature_transform(k), v)
-
-                    # attention output o: (batch_size, seq_len_q, num_head, head_dim_v)
-                    o = torch.einsum("bhld,bhdm->bhlm", feature_transform(q), kv) * scale
-
-                    # When you call contiguous(), it actually makes a copy of the tensor such that 
-                    # the order of its elements in memory is the same as if it had been created 
-                    # from scratch with the same data.
-                    if norm_output and q.size(-2) == k.size(-2): 
-                        o = normalize_output(q*scale, k, o)
-                    return o.contiguous()
-            self.attn = fla
-        # elif attn_name == 'retention':
-        #     from fla.ops.retention import fused_chunk_retention
-        #     def retention(q, k, v, dropout_p=0, is_causal = True, **kwargs):
-        #         if not is_causal: raise ValueError("retention only supports causal attention")
-        #         if dropout_p != 0: raise ValueError("dropout_p must be 0 for retention")
-        #         return fused_chunk_retention(q,k,v,initial_state=None,output_final_state=False)[0]
-        #     self.attn = retention
-        # elif attn_name == 'gla':
-        #     from fla.ops.gla import fused_chunk_gla
-        #     def gla(q, k, v, dropout_p=0, is_causal = True, **kwargs):
-        #         if not is_causal: raise ValueError("gla only supports causal attention")
-        #         if dropout_p != 0: raise ValueError("dropout_p must be 0 for gla")
-        #         return fused_chunk_gla(q, k, v, gk, initial_state=None, output_final_state=False)[0]
         else:
             raise ValueError(f"attn_name={attn_name} is not supported. Supported options: 'flash_attention', 'flash_linear_attention'")
         self.attn_name = attn_name
