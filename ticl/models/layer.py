@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.nn.modules.transformer import (Dropout, LayerNorm, Linear, Module, Optional, Tensor,
                                           _get_activation_fn)
 from torch.utils.checkpoint import checkpoint
+from torch.nn import MultiheadAttention
 
 import torch
 from torch.nn import Dropout, LayerNorm, Linear, Module
@@ -82,24 +83,7 @@ class TransformerEncoderLayer(Module):
         
         factory_kwargs = {'device': device, 'dtype': dtype}
         super().__init__()
-
-        if (torch.__version__ >= '2.2.0') or (not attn_name in ['default', 'flash_attention']):
-            if attn_name == 'default': attn_name = 'flash_attention'
-            from ticl.models.flash_transformer import MultiheadAttention
-            self.self_attn = MultiheadAttention(
-                d_model, 
-                nhead, 
-                dropout=dropout, 
-                batch_first=batch_first,
-                attn_name = attn_name,
-                feature_map = feature_map,
-                norm_output = norm_output,
-                **factory_kwargs,
-            )
-        else: 
-            # cannot use 'flash_attention'
-            from torch.nn import MultiheadAttention
-            self.self_attn = MultiheadAttention(
+        self.self_attn = MultiheadAttention(
                 d_model, 
                 nhead, 
                 dropout=dropout, 
