@@ -272,39 +272,5 @@ def get_ssm_layers(
 
         return linear_model
     
-    elif model in ['fla', 'retnet']:
-        from torch.nn import TransformerEncoder
-        from ticl.models.tabpfn import TransformerEncoderDiffInit
-        # import os 
-        # os.environ['CUDA_LAUNCH_BLOCKING']="1"
-        # os.environ['TORCH_USE_CUDA_DSA'] = "1"          
-
-        if model == 'fla': 
-            attn_name = 'fla'
-        elif model == 'retnet':
-            attn_name = 'retention'
-        
-        def encoder_layer_creator(): return TransformerEncoderLayer(
-            d_model, 
-            nheads,
-            d_intermediate,
-            dropout, 
-            activation = activation, 
-            pre_norm = pre_norm, 
-            recompute_attn = recompute_attn,  
-            attn_name = model,
-            norm_output = norm_output,
-            feature_map = feature_map,
-        )
-        transformer_encoder = TransformerEncoder(
-            encoder_layer_creator(),
-            n_layer,
-        ) if all_layers_same_init else TransformerEncoderDiffInit(encoder_layer_creator, n_layer)
-
-        return transformer_encoder
-    elif model == 'gla':
-        pass
-    elif model == 'retnet':
-        pass
     else:
         raise ValueError(f"Unknown model {model}")
