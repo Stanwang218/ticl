@@ -266,7 +266,7 @@ def get_batabpfn_default_config():
     config['prior']['classification']['pad_zeros'] = False
     return config
 
-def get_ssm_tabpfn_default_config():
+def get_tabflex_default_config():
     config = get_shared_defaults(encoder_type='ssm')
     return config
 
@@ -288,8 +288,8 @@ def get_model_default_config(model_type, model = None):
         config = get_baam_default_config()
     elif model_type == 'perceiver':
         config = get_perceiver_default_config()
-    elif model_type == 'ssm_tabpfn':
-        config = get_ssm_tabpfn_default_config()
+    elif model_type in ['tabflex', 'ssm_tabpfn']:
+        config = get_tabflex_default_config()
     elif model_type == 'ssm_mothernet':
         config = get_ssm_mothernet_default_config()
     else:

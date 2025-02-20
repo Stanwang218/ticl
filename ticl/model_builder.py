@@ -252,8 +252,8 @@ def get_model(
         model = GAMformer(
             n_out=n_out, n_features=config['prior']['num_features'],
             y_encoder_layer=y_encoder, **config['transformer'], **config['mothernet'], **config['additive'])
-    elif model_type == 'ssm_tabpfn':
-        from ticl.models.ssm_tabpfn import SSMTabPFN
+    elif model_type in ['tabflex', 'ssm_tabpfn']:
+        from ticl.models.tabflex import SSMTabPFN
         model = SSMTabPFN(
             n_out=n_out, 
             n_features=n_features, 

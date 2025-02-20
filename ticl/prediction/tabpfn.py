@@ -239,7 +239,7 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
             self.models_in_memory[model_key] = (model, c, results_file)
             # if len(self.models_in_memory) == 2:
             #    print('Multiple models in memory. This might lead to memory issues. Consider calling remove_models_from_memory()')
-        if c.get("model_type", "tabpfn") not in ["tabpfn", "batabpfn", 'ssm_tabpfn']:
+        if c.get("model_type", "tabpfn") not in ["tabpfn", "batabpfn", 'tabflex', 'ssm_tabpfn']:
             raise ValueError(f"Cannot load {c['model_type']} weights into TabPFNClassifier.")
         self.c = c
         # Support both new nested config as well as original flat config

@@ -4,7 +4,7 @@ import lightning as L
 import pytest
 
 from ticl.fit_model import main
-from ticl.models.ssm_tabpfn import SSMTabPFN
+from ticl.models.tabflex import SSMTabPFN
 from ticl.prediction import TabPFNClassifier
 
 from ticl.testing_utils import count_parameters, check_predict_iris
@@ -19,19 +19,19 @@ TESTING_DEFAULTS_SHORT = ['-C', '-E', '2', '-n', '1', '-A', 'False', '-e', '128'
 def test_train_tabflex_basic():
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
-        results = main(['ssm_tabpfn'] + TESTING_DEFAULTS + ['-B', tmpdir])
+        results = main(['tabflex'] + TESTING_DEFAULTS + ['-B', tmpdir])
         clf = TabPFNClassifier(device='cpu', model_string=results['model_string'], epoch=results['epoch'], base_path=results['base_path'])
         check_predict_iris(clf)
     assert isinstance(results['model'], SSMTabPFN)
     assert count_parameters(results['model']) == 580106
-    assert results['model_string'].startswith("ssm_tabpfn_AFalse_e128_E10_N4_n1_tFalse_cpu")
+    assert results['model_string'].startswith("tabflex_AFalse_e128_E10_N4_n1_tFalse_cpu")
     assert results['loss'] == pytest.approx(0.7184109687805176, rel=1e-4)
 
 
 def test_train_tabpfn_num_features():
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
-        results = main(['ssm_tabpfn'] + TESTING_DEFAULTS_SHORT + ['-B', tmpdir, '--num-features', '13'])
+        results = main(['tabflex'] + TESTING_DEFAULTS_SHORT + ['-B', tmpdir, '--num-features', '13'])
         clf = TabPFNClassifier(device='cpu', model_string=results['model_string'], epoch=results['epoch'], base_path=results['base_path'])
         check_predict_iris(clf)
     assert isinstance(results['model'], SSMTabPFN)
@@ -44,7 +44,7 @@ def test_train_tabpfn_num_samples():
     # smoke test only since I'm too lazy to mock
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
-        results = main(['ssm_tabpfn'] + TESTING_DEFAULTS_SHORT + ['-B', tmpdir, '--n-samples', '35'])
+        results = main(['tabflex'] + TESTING_DEFAULTS_SHORT + ['-B', tmpdir, '--n-samples', '35'])
         clf = TabPFNClassifier(device='cpu', model_string=results['model_string'], epoch=results['epoch'], base_path=results['base_path'])
         check_predict_iris(clf)
     assert isinstance(results['model'], SSMTabPFN)

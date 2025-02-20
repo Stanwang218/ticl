@@ -578,7 +578,7 @@ def validate_model(model, config):
     from ticl.models.mothernet_additive import MotherNetAdditive
     from ticl.models.mothernet import MotherNet
     from ticl.models.ssm_mothernet import SSMMotherNet
-    from ticl.models.ssm_tabpfn import SSMTabPFN
+    from ticl.models.tabflex import SSMTabPFN
     from ticl.models.tabpfn import TabPFN
     from ticl.models.perceiver import TabPerceiver
     from ticl.models.biattention_tabpfn import BiAttentionTabPFN
