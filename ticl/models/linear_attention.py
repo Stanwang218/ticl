@@ -1,6 +1,8 @@
 import torch
 from torch.nn import Module, Linear, LayerNorm, Dropout
 import torch.nn.functional as F
+from torch import nn
+import math
 
 from fast_transformers.events import EventDispatcher
 from fast_transformers.masking import FullMask, LengthMask
@@ -8,6 +10,33 @@ from fast_transformers.attention import AttentionLayer
 from fast_transformers.builders.attention_builders import AttentionBuilder
 from fast_transformers.transformers import TransformerEncoder
 from fast_transformers.builders.transformer_builders import BaseTransformerEncoderBuilder
+from fast_transformers.feature_maps.base import FeatureMap
+
+
+class HedgehogFeatureMap(FeatureMap):
+    def __init__(self, query_dims):
+        super().__init__(query_dims)
+        self.head_dim = query_dims
+        self.layer = nn.Linear(self.head_dim, self.head_dim)
+        self._init_weights()
+
+    def _init_weights(self):
+        nn.init.normal_(self.layer.weight, mean=0.0, std=1 / math.sqrt(self.head_dim))
+        nn.init.zeros_(self.layer.bias)
+
+    def new_feature_map(self, device):
+        self.to(device)
+
+    def forward(self, x):
+        x_lin = self.layer(x)
+        x_softmax = F.softmax(x_lin, dim=-1)
+        x_neg = F.softmax(-x_lin, dim=-1)
+        x_cat = torch.cat([x_softmax, x_neg], dim=-1)
+        return x_cat
+
+hedgehog_feature_map = HedgehogFeatureMap.factory()
+
+
 
 class LinearAttentionTransformerEncoderLayer(Module):
     """Self attention and feed forward network with skip connections.

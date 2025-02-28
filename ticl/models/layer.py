@@ -31,6 +31,8 @@ class BiAttentionEncoderLayer(Module):
         return res.reshape(src.shape)
 
 
+
+
 class TransformerEncoderLayer(Module):
     r"""TransformerEncoderLayer is made up of self-attn and feedforward network.
     This standard encoder layer is based on the paper "Attention Is All You Need".
@@ -268,6 +270,11 @@ def get_ssm_layers(
 
         # Build a transformer with linear attention
         builder.attention_type = "linear"
+
+        if feature_map == "hedgehog":
+            from ticl.models.linear_attention import hedgehog_feature_map
+            builder.feature_map = hedgehog_feature_map
+
         linear_model = builder.get()
 
         return linear_model

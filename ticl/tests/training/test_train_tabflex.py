@@ -28,6 +28,19 @@ def test_train_tabflex_basic():
     assert results['loss'] == pytest.approx(0.7184109687805176, rel=1e-4)
 
 
+def test_train_tabflex_hedgehog():
+    L.seed_everything(42)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        results = main(['tabflex'] + TESTING_DEFAULTS + ['-B', tmpdir, '--feature-map', 'hedgehog'])
+        clf = TabPFNClassifier(device='cpu', model_string=results['model_string'], epoch=results['epoch'], base_path=results['base_path'])
+        check_predict_iris(clf)
+    assert isinstance(results['model'], SSMTabPFN)
+    assert count_parameters(results['model']) == 646154
+    assert results['model_string'].startswith("tabflex_AFalse_e128_E10_featuremaphedgehog_N4_n1_tFalse_cpu")
+    assert results['loss'] == pytest.approx(0.6987347602844238, rel=1e-4)
+
+
+
 def test_train_tabpfn_num_features():
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
