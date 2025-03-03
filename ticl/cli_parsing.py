@@ -221,7 +221,7 @@ def argparser_from_config(parser, description="Train Mothernet"):
     orchestration = parser.add_argument_group('orchestration')
     orchestration.add_argument('--extra-fast-test', help="whether to use tiny data", action='store_true')
     orchestration.add_argument('--stop-after-epochs', help="for pausing rungs with synetune", type=int, default=None)
-    orchestration.add_argument('--seed-everything', help="whether to seed everything for testing and benchmarking", default = True, type=str2bool)
+    orchestration.add_argument('--seed-everything', help="whether to seed everything for testing and benchmarking", default = False, type=str2bool)
     orchestration.add_argument('--experiment', help="Name of mlflow experiment", default='Default')
     orchestration.add_argument('-R', '--create-new-run', help="Create as new MLFLow run, even if continuing", action='store_true')
     orchestration.add_argument('-B', '--base-path', default='.')
