@@ -41,6 +41,19 @@ def test_train_tabflex_hedgehog():
 
 
 
+def test_train_tabflex_hedgehog_shared():
+    L.seed_everything(42)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        results = main(['tabflex'] + TESTING_DEFAULTS + ['-B', tmpdir, '--feature-map', 'hedgehog_shared'])
+        clf = TabPFNClassifier(device='cpu', model_string=results['model_string'], epoch=results['epoch'], base_path=results['base_path'])
+        check_predict_iris(clf)
+    assert isinstance(results['model'], SSMTabPFN)
+    assert count_parameters(results['model']) == 596618
+    assert results['model_string'].startswith("tabflex_AFalse_e128_E10_featuremaphedgehog_shared_N4_n1_tFalse_cpu")
+    assert results['loss'] == pytest.approx(0.0, rel=1e-4)
+
+
+
 def test_train_tabpfn_num_features():
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:

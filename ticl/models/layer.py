@@ -274,6 +274,11 @@ def get_ssm_layers(
         if feature_map == "hedgehog":
             from ticl.models.linear_attention import hedgehog_feature_map
             builder.feature_map = hedgehog_feature_map
+        
+        elif feature_map == "hedgehog_shared":
+            from ticl.models.linear_attention import hedgehog_feature_map
+            shared_feature_map = hedgehog_feature_map(d_model // nheads)
+            builder.feature_map = lambda x: shared_feature_map
 
         linear_model = builder.get()
 

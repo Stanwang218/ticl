@@ -131,7 +131,7 @@ def argparser_from_config(parser, description="Train Mothernet"):
         ssm.add_argument('--model', type = str, choices = ['linear_attention', 'fla'], help = 'which ssm model to use')
         
         ## specific to fla
-        ssm.add_argument('--feature-map', help='when the model is fla, which feature map to use', type = str, choices = ['identity', 'elu', 'hedgehog'])
+        ssm.add_argument('--feature-map', help='when the model is fla, which feature map to use', type = str, choices = ['identity', 'elu', 'hedgehog', 'hedgehog_shared'])
         ssm.add_argument('--norm-output', help='when the model is fla, whether to normalize the output of the model', action = 'store_true', default = False)
         ssm.add_argument('--causal-mask', help='when the model is fla, Whether to use causal attention', action='store_true', default=False)
         ssm.set_defaults(**config['ssm'])
