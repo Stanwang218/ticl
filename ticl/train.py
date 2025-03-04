@@ -52,6 +52,12 @@ def train_epoch(
     if progress_bar:
         dl = tqdm(dl)
     for batch, (data, targets, single_eval_pos) in enumerate(dl):
+        # change the description of the progress bar
+        if progress_bar:
+            dl.set_description(f'| train sample number: {single_eval_pos} | test sample number: {data[1].shape[0] - single_eval_pos}')
+        if wandb.run is not None:
+            wandb.log({'train_train_sample_number': single_eval_pos, 'train_test_sample_number': data[1].shape[0] - single_eval_pos})
+
         if using_dist and not (batch % aggregate_k_gradients == aggregate_k_gradients - 1):
             cm = model.no_sync()
         else:
