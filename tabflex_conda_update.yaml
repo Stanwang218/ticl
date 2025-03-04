@@ -206,7 +206,6 @@ dependencies:
       - greenlet==3.0.3
       - gunicorn==22.0.0
       - huggingface-hub==0.23.4
-      - hyperfast==1.0.2
       - hyperopt==0.2.7
       - importlib-metadata==7.1.0
       - iniconfig==2.0.0
@@ -287,7 +286,6 @@ dependencies:
       - stack-data==0.6.3
       - tenacity==8.4.1
       - threadpoolctl==3.5.0
-      - ticl==0.1.0
       - tokenizers==0.19.1
       - tomli==2.2.1
       - tornado==6.4.1
