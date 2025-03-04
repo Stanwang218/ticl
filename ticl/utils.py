@@ -658,6 +658,7 @@ def validate_model(model, config):
         per_dataset_scores = {key: np.mean([g['mean_metric'] for g in group]) for key, group in itertools.groupby(results, lambda x: x['dataset'])}
         return mean_auc, per_dataset_scores
     else:
+        # regression
         cc_valid_datasets_regression, _ = load_openml_list(
             open_cc_valid_dids_regression, multiclass=False, shuffled=True, filter_for_nan=False, max_samples=10000,
             num_feats=100, return_capped=False, classification=False)
