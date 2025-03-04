@@ -10,7 +10,7 @@ from fast_transformers.attention import AttentionLayer
 from fast_transformers.builders.attention_builders import AttentionBuilder
 from fast_transformers.transformers import TransformerEncoder
 from fast_transformers.builders.transformer_builders import BaseTransformerEncoderBuilder
-from fast_transformers.feature_maps.base import FeatureMap
+from fast_transformers.feature_maps.base import FeatureMap, ActivationFunctionFeatureMap
 
 
 class HedgehogFeatureMap(FeatureMap):
@@ -36,7 +36,9 @@ class HedgehogFeatureMap(FeatureMap):
 
 hedgehog_feature_map = HedgehogFeatureMap.factory()
 
-
+identity_feature_map = ActivationFunctionFeatureMap.factory(
+    lambda x: x
+)
 
 class LinearAttentionTransformerEncoderLayer(Module):
     """Self attention and feed forward network with skip connections.
