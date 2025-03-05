@@ -97,7 +97,6 @@ class TransformerEncoderLayer(Module):
         dtype=None, 
         recompute_attn=False,
         attn_name = 'default',
-        feature_map='identity',
         norm_output = False,
     ) -> None:
         # batch_first is set to True for using flash attention II
@@ -299,6 +298,14 @@ def get_ssm_layers(
             from ticl.models.linear_attention import hedgehog_feature_map
             shared_feature_map = hedgehog_feature_map(d_model // nheads)
             builder.feature_map = lambda x: shared_feature_map
+
+        elif feature_map == "elu":
+            from fast_transformers.feature_maps.base import elu_feature_map
+            builder.feature_map = elu_feature_map
+
+        elif feature_map == "identity":
+            from ticl.models.linear_attention import identity_feature_map
+            builder.feature_map = identity_feature_map
 
         linear_model = builder.get()
 

@@ -65,7 +65,7 @@ def get_ssm_config():
         'all_layers_same_init': True,
         'model': 'linear_attention',
         'causal_mask': False,
-        'feature_map': 'identity',
+        'feature_map': 'elu',
         'norm_output': False,
     }
     return {'ssm': ssm}

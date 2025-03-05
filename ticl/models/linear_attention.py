@@ -164,8 +164,6 @@ elu_feature_map = ActivationFunctionFeatureMap.factory(
     lambda x: torch.nn.functional.elu(x) + 1
 )
 
-
-
 class HedgehogFeatureMap(FeatureMap):
     def __init__(self, query_dims):
         super().__init__(query_dims)
@@ -189,7 +187,9 @@ class HedgehogFeatureMap(FeatureMap):
 
 hedgehog_feature_map = HedgehogFeatureMap.factory()
 
-
+identity_feature_map = ActivationFunctionFeatureMap.factory(
+    lambda x: x
+)
 
 class LinearAttention(Module):
     """Implement unmasked attention using dot product of feature maps in

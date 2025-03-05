@@ -52,6 +52,12 @@ def train_epoch(
     if progress_bar:
         dl = tqdm(dl)
     for batch, (data, targets, single_eval_pos) in enumerate(dl):
+        # change the description of the progress bar
+        if progress_bar:
+            dl.set_description(f'| train sample number: {single_eval_pos} | test sample number: {data[1].shape[0] - single_eval_pos}')
+        if wandb.run is not None:
+            wandb.log({'train_train_sample_number': single_eval_pos, 'train_test_sample_number': data[1].shape[0] - single_eval_pos})
+
         if using_dist and not (batch % aggregate_k_gradients == aggregate_k_gradients - 1):
             cm = model.no_sync()
         else:
@@ -211,7 +217,7 @@ def train(dl, model, criterion, optimizer_state=None, scheduler=None,
             if verbose:
                 print('-' * 89)
                 print(
-                    f'| end of epoch {epoch:3d} | Wallcolock time: {train_time[-1]:5.2f}s | GPU time: {train_gpu_time[-1]:5.2f}s | mean loss {total_loss:5.4f} | ')
+                    f'| end of epoch {epoch:3d} | Wallclock time: {train_time[-1]:5.2f}s | GPU time: {train_gpu_time[-1]:5.2f}s | mean loss {total_loss:5.4f} | ')
 
                 if wandb.run: 
                     wandb.log({"avg_train_time": sum(train_time)/len(train_time), "train_time": train_time[-1]})

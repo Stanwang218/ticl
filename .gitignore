@@ -183,6 +183,7 @@ mothernet/mlruns
 tabpfn/mlruns/
 tabpfn/results
 mothernet/results_bak
+ticl/models_diff
 
 mlruns
 **/wandb/
