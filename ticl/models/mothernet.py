@@ -4,8 +4,7 @@ from torch.nn import TransformerEncoder
 
 from ticl.models.encoders import OneHotAndLinear
 from ticl.models.decoders import MLPModelDecoder
-from ticl.models.layer import TransformerEncoderLayer
-from ticl.models.tabpfn import TransformerEncoderDiffInit
+from ticl.models.layer import TransformerEncoderLayer, TransformerEncoderSimple
 from ticl.models.encoders import Linear
 
 from ticl.utils import SeqBN, get_init_method
@@ -77,8 +76,7 @@ class MotherNet(MLPModelPredictor):
         # mothernet has batch_first=False, unlike all the other models.
         def encoder_layer_creator(): return TransformerEncoderLayer(emsize, nhead, nhid, dropout, activation=activation,
                                                                     pre_norm=pre_norm, recompute_attn=recompute_attn, batch_first=False)
-        self.transformer_encoder = TransformerEncoder(encoder_layer_creator(), nlayers)\
-            if all_layers_same_init else TransformerEncoderDiffInit(encoder_layer_creator, nlayers)
+        self.transformer_encoder = TransformerEncoderSimple(encoder_layer_creator, nlayers)
         
         backbone_size = sum(p.numel() for p in self.transformer_encoder.parameters())
         if wandb.run: wandb.log({"backbone_size": backbone_size})

@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 
 from ticl.models.encoders import Linear
-from ticl.models.layer import get_ssm_layers
+from ticl.models.linear_attention import get_ssm_layers
 
 from ticl.utils import SeqBN
 
@@ -101,7 +101,10 @@ class SSMTabPFN(nn.Module):
             
         # output = self.ssm(src, src_mask)
         if self.model in ['linear_attention']:
+            src = src.permute(1, 0, 2) # (seq_len, batch_size, emsize) -> (batch_size, seq_len, emsize)
+            # the linear attention layers is written for batch_first = True
             output = self.ssm(src, src_mask)
+            output = output.permute(1, 0, 2)
         else:
             raise NotImplementedError(f"Model {self.model} is not implemented yet.")
         

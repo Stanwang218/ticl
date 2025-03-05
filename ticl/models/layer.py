@@ -8,7 +8,8 @@ from torch.utils.checkpoint import checkpoint
 from torch.nn import MultiheadAttention
 
 import torch
-from torch.nn import Dropout, LayerNorm, Linear, Module
+from torch.nn import Dropout, LayerNorm, Linear, Module, TransformerEncoder
+
 
 class BiAttentionEncoderLayer(Module):
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu",
@@ -131,15 +132,12 @@ class TransformerEncoderLayer(Module):
         self, 
         src: Tensor, 
         src_mask: Optional[Tensor] = None, 
-        src_key_padding_mask: Optional[Tensor] = None,
-        is_causal: bool = False,
     ) -> Tensor:
         r"""Pass the input through the encoder layer.
 
         Args:
             src: the sequence to the encoder layer (required).
             src_mask: the mask for the src sequence (optional).
-            src_key_padding_mask: the mask for the src keys per batch (optional).
 
         Shape:
             see the docs in Transformer class.
@@ -152,23 +150,11 @@ class TransformerEncoderLayer(Module):
         if isinstance(src_mask, tuple):
             return NotImplementedError
         elif isinstance(src_mask, int):
-            assert src_key_padding_mask is None
-
             single_eval_position = src_mask
-            if is_causal:
-                if self.attn_name in ['flash_attention', 'default']:
-                    train_mask = nn.Transformer.generate_square_subsequent_mask(single_eval_position).to(dtype=torch.bool,device=src.device)
-                elif self.attn_name == 'flash_linear_attention':
-                    # the causal mask is implemented internally
-                    train_mask = None
-                test_mask = None
-                train_is_causal = True
-                test_is_causal = False
-            else:
-                train_mask = None
-                test_mask = None
-                train_is_causal = False
-                test_is_causal = False
+            train_mask = None
+            test_mask = None
+            train_is_causal = False
+            test_is_causal = False
 
             # split the training and testing samples
             src_train = src_[:single_eval_position]
@@ -210,13 +196,12 @@ class TransformerEncoderLayer(Module):
                     src_, 
                     src_, 
                     src_, 
-                    src_key_padding_mask, 
                     # need_weights if specified returns attn_output_weights 
                     # in addition to attn_outputs
                     True, 
                     src_mask,
                     True,
-                    is_causal,
+                    False,
                     use_reentrant=True,
                 )[0]
             else:
@@ -225,8 +210,7 @@ class TransformerEncoderLayer(Module):
                     key = src_, 
                     value = src_, 
                     attn_mask = src_mask,
-                    key_padding_mask = src_key_padding_mask,
-                    is_causal = is_causal,
+                    is_causal = False,
                     need_weights=False,
                 )[0]
         
@@ -246,70 +230,46 @@ class TransformerEncoderLayer(Module):
             src = self.norm2(src)
         return src
 
-def get_ssm_layers(
-    d_model: int,
-    n_layer: int,
-    d_intermediate: int,
-    model = 'linear_attention',
-    ssm_cfg=None,
-    attn_layer_idx=None,
-    attn_cfg=None,
-    norm_epsilon: float = 1e-5,
-    rms_norm: bool = False,
-    initializer_cfg=None,
-    fused_add_norm=False,
-    residual_in_fp32=False,
-    device=None,
-    dtype=None,
-    nheads = 2,
-    dropout = 0.0,
-    activation = 'gelu',
-    pre_norm = False,
-    recompute_attn = False,
-    all_layers_same_init = False,
-    norm_output = False,
-    feature_map = 'identity',
-):
-    if dtype is None:
-        dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
-    if model == 'linear_attention':
-        from ticl.models.linear_attention import TransformerEncoderBuilder
 
-        if d_model % nheads != 0:
-            raise ValueError(f"nheads {nheads} must divide d_model {d_model}!")
+class TransformerEncoderSimple(Module):
+    r"""TransformerEncoder is a stack of N encoder layers
 
-        # Create the builder for our transformers
-        builder = TransformerEncoderBuilder.from_kwargs(
-            n_layers=n_layer,
-            n_heads=nheads,
-            query_dimensions=d_model // nheads,
-            value_dimensions=d_model // nheads,
-            feed_forward_dimensions=d_intermediate,
-        )
+    Args:
+        encoder_layer_creator: a function generating objects of TransformerEncoderLayer class without args (required).
+        num_layers: the number of sub-encoder-layers in the encoder (required).
+        norm: the layer normalization component (optional).
+    """
+    __constants__ = ['norm']
 
-        # Build a transformer with linear attention
-        builder.attention_type = "linear"
+    def __init__(self, encoder_layer_creator, num_layers, norm=None):
+        super().__init__()
+        self.layers = nn.ModuleList([encoder_layer_creator() for _ in range(num_layers)])
+        self.num_layers = num_layers
+        self.norm = norm
 
-        if feature_map == "hedgehog":
-            from ticl.models.linear_attention import hedgehog_feature_map
-            builder.feature_map = hedgehog_feature_map
-        
-        elif feature_map == "hedgehog_shared":
-            from ticl.models.linear_attention import hedgehog_feature_map
-            shared_feature_map = hedgehog_feature_map(d_model // nheads)
-            builder.feature_map = lambda x: shared_feature_map
+    def forward(
+        self, 
+        src: Tensor, 
+        mask: Optional[Tensor] = None, 
+    ) -> Tensor:
+        r"""Pass the input through the encoder layers in turn.
 
-        elif feature_map == "elu":
-            from fast_transformers.feature_maps.base import elu_feature_map
-            builder.feature_map = elu_feature_map
+        Args:
+            src: the sequence to the encoder (required).
+            mask: the mask for the src sequence (optional).
 
-        elif feature_map == "identity":
-            from ticl.models.linear_attention import identity_feature_map
-            builder.feature_map = identity_feature_map
+        Shape:
+            see the docs in Transformer class.
+        """
+        output = src
 
-        linear_model = builder.get()
+        for mod in self.layers:
+            output = mod(
+                output, 
+                src_mask=mask,
+            )
 
-        return linear_model
-    
-    else:
-        raise ValueError(f"Unknown model {model}")
+        if self.norm is not None:
+            output = self.norm(output)
+
+        return output

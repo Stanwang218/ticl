@@ -1,11 +1,8 @@
-from typing import Optional
 
 import torch, wandb
 import torch.nn as nn
-from torch import Tensor
-from torch.nn import Module, TransformerEncoder
 
-from ticl.models.layer import TransformerEncoderLayer
+from ticl.models.layer import TransformerEncoderLayer, TransformerEncoderSimple
 from ticl.utils import SeqBN, get_init_method
 from ticl.models.encoders import Linear
 
@@ -31,8 +28,7 @@ class TabPFN(nn.Module):
             pre_norm=pre_norm, 
             recompute_attn=recompute_attn,
         )
-        self.transformer_encoder = TransformerEncoder(encoder_layer_creator(), nlayers)\
-            if all_layers_same_init else TransformerEncoderDiffInit(encoder_layer_creator, nlayers)
+        self.transformer_encoder =  TransformerEncoderSimple(encoder_layer_creator, nlayers)
         backbone_size = sum(p.numel() for p in self.transformer_encoder.parameters())
         if wandb.run: wandb.log({"backbone_size": backbone_size})
         print("Number of parameters in backbone: ", backbone_size)
@@ -88,51 +84,3 @@ class TabPFN(nn.Module):
         # decoder is some position-wise operation
         output = self.decoder(output)
         return output[single_eval_pos:]
-
-class TransformerEncoderDiffInit(Module):
-    r"""TransformerEncoder is a stack of N encoder layers
-
-    Args:
-        encoder_layer_creator: a function generating objects of TransformerEncoderLayer class without args (required).
-        num_layers: the number of sub-encoder-layers in the encoder (required).
-        norm: the layer normalization component (optional).
-    """
-    __constants__ = ['norm']
-
-    def __init__(self, encoder_layer_creator, num_layers, norm=None):
-        super().__init__()
-        self.layers = nn.ModuleList([encoder_layer_creator() for _ in range(num_layers)])
-        self.num_layers = num_layers
-        self.norm = norm
-
-    def forward(
-        self, 
-        src: Tensor, 
-        mask: Optional[Tensor] = None, 
-        src_key_padding_mask: Optional[Tensor] = None,
-        is_causal: Optional[bool] = False,
-    ) -> Tensor:
-        r"""Pass the input through the encoder layers in turn.
-
-        Args:
-            src: the sequence to the encoder (required).
-            mask: the mask for the src sequence (optional).
-            src_key_padding_mask: the mask for the src keys per batch (optional).
-
-        Shape:
-            see the docs in Transformer class.
-        """
-        output = src
-
-        for mod in self.layers:
-            output = mod(
-                output, 
-                src_mask=mask, 
-                src_key_padding_mask=src_key_padding_mask, 
-                is_causal=is_causal
-            )
-
-        if self.norm is not None:
-            output = self.norm(output)
-
-        return output

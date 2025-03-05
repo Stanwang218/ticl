@@ -3,6 +3,8 @@ from torch.nn import Module, Linear, LayerNorm, Dropout
 import torch.nn.functional as F
 from torch import nn
 import math
+from ticl.models.layer import TransformerEncoderSimple
+
 
 from fast_transformers.masking import LengthMask
 from fast_transformers.builders.attention_builders import AttentionBuilder
@@ -292,7 +294,7 @@ class LinearAttentionTransformerEncoderLayer(Module):
         self.dropout = Dropout(dropout)
         self.activation = getattr(F, activation)
 
-    def forward(self, x, attn_mask = None, length_mask=None):
+    def forward(self, x, src_mask = None, length_mask=None):
         """Apply the transformer encoder to the input x.
 
         Arguments
@@ -310,16 +312,16 @@ class LinearAttentionTransformerEncoderLayer(Module):
         # Normalize the masks
         batch_size, num_samples, d_model = x.shape
 
-        if isinstance(attn_mask, int):
+        if isinstance(src_mask, int):
             # tabpfn
-            single_eval_position = attn_mask
+            single_eval_position = src_mask
             train_samples = x[:,:single_eval_position,:]
             test_samples = x[:,single_eval_position:,:]
 
             num_train_samples = train_samples.shape[1]
             num_test_samples = test_samples.shape[1]
 
-            attn_mask = None
+            src_mask = None
 
             # Run self attention and add it to the input
             # the training samples are only attend to themselves
@@ -350,7 +352,7 @@ class LinearAttentionTransformerEncoderLayer(Module):
             LengthMask(x.new_full((batch_size,), num_samples, dtype=torch.int64))
             attn_output = self.attention(
                 x, x, x,
-                attn_mask=attn_mask,
+                attn_mask=src_mask,
                 query_lengths=length_mask,
                 key_lengths=length_mask
             )
@@ -400,3 +402,90 @@ class TransformerEncoderBuilder(BaseTransformerEncoderBuilder):
         """Return the class for the transformer encoder layer."""
         return LinearAttentionTransformerEncoderLayer
     
+
+
+def get_ssm_layers(
+    d_model: int,
+    n_layer: int,
+    d_intermediate: int,
+    model = 'linear_attention',
+    ssm_cfg=None,
+    attn_layer_idx=None,
+    attn_cfg=None,
+    norm_epsilon: float = 1e-5,
+    rms_norm: bool = False,
+    initializer_cfg=None,
+    fused_add_norm=False,
+    residual_in_fp32=False,
+    device=None,
+    dtype=None,
+    nheads = 2,
+    dropout = 0.0,
+    activation = 'gelu',
+    pre_norm = False,
+    recompute_attn = False,
+    all_layers_same_init = False,
+    norm_output = False,
+    feature_map = 'identity',
+):
+    if dtype is None:
+        dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+    if model == 'linear_attention':
+        # from ticl.models.linear_attention import TransformerEncoderBuilder
+
+        if d_model % nheads != 0:
+            raise ValueError(f"nheads {nheads} must divide d_model {d_model}!")
+            
+        if feature_map == "hedgehog":
+            from ticl.models.linear_attention import hedgehog_feature_map
+            feature_map_func = hedgehog_feature_map
+        
+        elif feature_map == "hedgehog_shared":
+            from ticl.models.linear_attention import hedgehog_feature_map
+            shared_feature_map = hedgehog_feature_map(d_model // nheads)
+            feature_map_func = lambda x: shared_feature_map
+
+        elif feature_map == "elu":
+            from fast_transformers.feature_maps.base import elu_feature_map
+            feature_map_func = elu_feature_map
+
+        elif feature_map == "identity":
+            from ticl.models.linear_attention import identity_feature_map
+            feature_map_func = identity_feature_map
+
+        attention_layer = AttentionLayer(
+            attention=LinearAttention(query_dimensions=d_model // nheads, feature_map=feature_map_func),
+            d_model=d_model,
+            n_heads=nheads,
+            d_keys=d_model // nheads,
+            d_values=d_model // nheads,
+        )
+        def encoder_layer_creator():
+            return LinearAttentionTransformerEncoderLayer(
+                attention=attention_layer,
+                d_model=d_model,
+                d_ff=d_intermediate,
+                dropout=dropout,
+                activation=activation)
+        linear_model = TransformerEncoderSimple(encoder_layer_creator=encoder_layer_creator, num_layers=n_layer)
+        # # Create the builder for our transformers
+        # builder = TransformerEncoderBuilder.from_kwargs(
+        #     n_layers=n_layer,
+        #     n_heads=nheads,
+        #     query_dimensions=d_model // nheads,
+        #     value_dimensions=d_model // nheads,
+        #     feed_forward_dimensions=d_intermediate,
+        # )
+
+        # # Build a transformer with linear attention
+        # builder.attention_type = "linear"
+        # builder.feature_map = feature_map_func
+
+
+
+        # linear_model = builder.get()
+
+        return linear_model
+    
+    else:
+        raise ValueError(f"Unknown model {model}")

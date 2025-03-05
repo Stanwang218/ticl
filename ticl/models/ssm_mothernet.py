@@ -6,7 +6,7 @@ from ticl.utils import SeqBN
 from ticl.models.decoders import MLPModelDecoder
 from ticl.models.mothernet import MLPModelPredictor
 from ticl.models.encoders import Linear
-from ticl.models.layer import get_ssm_layers
+from ticl.models.linear_attention import get_ssm_layers
 
 class SSMMotherNet(MLPModelPredictor):
     def __init__(self, *, model, n_out, emsize, nhead, nhid_factor, nlayers, n_features, dropout=0.0, y_encoder_layer=None,

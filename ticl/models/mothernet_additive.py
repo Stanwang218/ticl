@@ -3,8 +3,7 @@ import torch.nn as nn
 
 from ticl.models.decoders import AdditiveModelDecoder, FactorizedAdditiveModelDecoder
 from ticl.models.encoders import BinEmbeddingEncoder, Linear, OneHotAndLinear
-from ticl.models.layer import TransformerEncoderLayer
-from ticl.models.tabpfn import TransformerEncoderDiffInit
+from ticl.models.layer import TransformerEncoderLayer, TransformerEncoderSimple
 from ticl.models.utils import bin_data
 from ticl.utils import SeqBN, get_init_method
 
@@ -35,8 +34,7 @@ class MotherNetAdditive(nn.Module):
 
         def encoder_layer_creator(): return TransformerEncoderLayer(emsize, nhead, nhid, dropout, activation=activation,
                                                                     pre_norm=pre_norm, recompute_attn=recompute_attn, batch_first=False)
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layer_creator(), nlayers)\
-            if all_layers_same_init else TransformerEncoderDiffInit(encoder_layer_creator, nlayers)
+        self.transformer_encoder = TransformerEncoderSimple(encoder_layer_creator, nlayers)
         self.emsize = emsize
 
         if input_bin_embedding == "linear":

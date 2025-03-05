@@ -62,7 +62,7 @@ def get_ssm_config():
         'efficient_eval_masking': True,
         'input_normalization': False,
         'tabpfn_zero_weights': True,
-        'all_layers_same_init': True,
+        'all_layers_same_init': False,
         'model': 'linear_attention',
         'causal_mask': False,
         'feature_map': 'elu',
