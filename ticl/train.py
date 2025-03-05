@@ -217,7 +217,7 @@ def train(dl, model, criterion, optimizer_state=None, scheduler=None,
             if verbose:
                 print('-' * 89)
                 print(
-                    f'| end of epoch {epoch:3d} | Wallcolock time: {train_time[-1]:5.2f}s | GPU time: {train_gpu_time[-1]:5.2f}s | mean loss {total_loss:5.4f} | ')
+                    f'| end of epoch {epoch:3d} | Wallclock time: {train_time[-1]:5.2f}s | GPU time: {train_gpu_time[-1]:5.2f}s | mean loss {total_loss:5.4f} | ')
 
                 if wandb.run: 
                     wandb.log({"avg_train_time": sum(train_time)/len(train_time), "train_time": train_time[-1]})
