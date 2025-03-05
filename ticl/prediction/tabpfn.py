@@ -37,7 +37,7 @@ def _check_file(e, base_path, add_name, eval_addition, verbose):
             print('We have to download the TabPFN, as there is no checkpoint at ', model_path)
             print('It has about 100MB, so this might take a moment.')
             import requests
-            url = 'https://github.com/automl/TabPFN/raw/main/tabpfn/models_diff/prior_diff_real_checkpoint_n_0_epoch_42.cpkt'
+            url = 'https://amuellermothernet.blob.core.windows.net/models/download_epoch_100.cpkt'
             r = requests.get(url, allow_redirects=True)
             os.makedirs(os.path.dirname(model_path), exist_ok=True)
             with open(model_path, 'wb') as f:
@@ -93,7 +93,8 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         scale=True, 
         epoch=-1, 
         model=None, 
-        config=None
+        config=None,
+        max_num_train_samples = np.inf,
     ):
         """
         Initializes the classifier and loads the model.
@@ -144,6 +145,7 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         self.scale = scale
         self.model = model
         self.config = config
+        self.max_num_train_samples = max_num_train_samples
 
         assert self.no_preprocess_mode if not self.no_grad else True, \
             "If no_grad is false, no_preprocess_mode must be true, because otherwise no gradient can be computed."
@@ -166,15 +168,23 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         self.classes_ = cls
         return np.asarray(y, dtype=np.float64, order="C")
     
-    def preprocess(self, X, y, overwrite_warning=False):
-        self.features_mode, self.classes_mode = 'full', 'full'
-
+    def preprocess(self, X, y, overwrite_warning = False, dimension_reduction='random'):
+        self.classes_mode = 'full'
+        self.dimension_reduction = dimension_reduction
+        
         if X.shape[1] > self.max_num_features:
             Warning("The number of features for this classifier is restricted to ", self.max_num_features)
-            print('Only randomly take ', self.max_num_features, ' features.')
-            feature_selected = np.random.choice(X.shape[1], self.max_num_features, replace=False)
-            X = X[:, feature_selected]
-            self.features_mode = 'cropped'
+
+            if self.dimension_reduction == 'random':
+                print('Only randomly take ', self.max_num_features, ' features.')
+                self.feature_selected = np.random.choice(X.shape[1], self.max_num_features, replace=False)
+                X = X[:, self.feature_selected]
+
+            elif self.dimension_reduction == 'random_proj':
+                print('Random projection to ', self.max_num_features, ' features.')
+                self.random_proj = torch.nn.Linear(X.shape[1], self.max_num_features, bias=False, device=self.device)
+                with torch.no_grad():
+                    X = self.random_proj(torch.tensor(X, device=self.device)).cpu().numpy()
             
         if len(np.unique(y)) > self.max_num_classes:
             Warning("The number of classes for this classifier is restricted to ", self.max_num_classes)
@@ -192,13 +202,16 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
             self.label_encoder3.fit(y[y<0])
             # y[y<0] = self.label_encoder3.transform(y[y<0]) + self.max_num_classes - 1
             y[y<0] = self.max_num_classes - 1
-            self.classes_mode = 'cropped'
+            self.classes_mode = 'croped'
             
-        if X.shape[0] > 1024 and not overwrite_warning:
+        if X.shape[0] > self.max_num_train_samples and not overwrite_warning:
             Warning("⚠️ WARNING: TabPFN is not made for datasets with a trainingsize > 1024. Prediction might take a while, be less reliable."
                              "We advise not to run datasets > 10k samples, which might lead to your machine crashing "
                              "(due to quadratic memory scaling of TabPFN)."
                              "Please confirm you want to run by passing overwrite_warning=True to the fit function.")
+            selected_samples = np.random.choice(X.shape[0], self.max_num_train_samples, replace=False)
+            X = X[selected_samples]
+            y = y[selected_samples]
 
         self.X_ = X
         self.y_ = y
@@ -226,7 +239,7 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
             self.models_in_memory[model_key] = (model, c, results_file)
             # if len(self.models_in_memory) == 2:
             #    print('Multiple models in memory. This might lead to memory issues. Consider calling remove_models_from_memory()')
-        if c.get("model_type", "tabpfn") not in ["tabpfn", "batabpfn", 'ssm_tabpfn']:
+        if c.get("model_type", "tabpfn") not in ["tabpfn", "batabpfn", 'tabflex', 'ssm_tabpfn']:
             raise ValueError(f"Cannot load {c['model_type']} weights into TabPFNClassifier.")
         self.c = c
         # Support both new nested config as well as original flat config
@@ -261,8 +274,12 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         # Input validation
         if self.no_grad:
             X = check_array(X, force_all_finite=False)
-            if self.features_mode == 'cropped':
-                X = X[:, :self.max_num_features]
+            if X.shape[1] > self.max_num_features:      
+                if self.dimension_reduction == 'random':
+                    X = X[:, self.feature_selected]
+                elif self.dimension_reduction == 'random_proj':
+                    with torch.no_grad():
+                        X = self.random_proj(torch.tensor(X, device=self.device)).cpu().numpy()
             X_full = np.concatenate([self.X_, X], axis=0)
             X_full = torch.tensor(X_full, device=self.device).float().unsqueeze(1)
         else:
@@ -303,7 +320,7 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         )
         
         # add zeros to make the dimension same as the number of classes
-        if self.classes_mode == 'cropped':
+        if self.classes_mode == 'croped':
             prediction = torch.cat(
                 [
                     prediction, 
@@ -545,12 +562,12 @@ def transformer_predict(
                                     message="torch.cuda.amp.autocast only affects CUDA ops, but CUDA is not available.  Disabling.")
             if device == 'cpu':
                 output_batch = checkpoint(predict, batch_input, batch_label, softmax_temperature,
-                                          True,  model, eval_position, num_classes, inference_mode, no_grad)
+                                          True,  model, eval_position, num_classes, inference_mode, no_grad, use_reentrant=False)
 
             else:
                 with torch.cuda.amp.autocast(enabled=fp16_inference):
                     output_batch = checkpoint(predict, batch_input, batch_label, softmax_temperature,
-                                              True, model, eval_position, num_classes, inference_mode, no_grad)
+                                              True, model, eval_position, num_classes, inference_mode, no_grad, use_reentrant=False)
         outputs += [output_batch]
 
     outputs = torch.cat(outputs, 1)

@@ -59,9 +59,9 @@ def make_model_level_argparser(description="Train transformer-style model on syn
     baam_parser.set_defaults(model_type='baam')
     baam_parser = argparser_from_config(description="Train baam", parser=baam_parser)
     
-    ssm_tabpfn_parser = subparsers.add_parser('ssm_tabpfn', help='Train a SSMtabpfn model')
-    ssm_tabpfn_parser.set_defaults(model_type='ssm_tabpfn')
-    ssm_tabpfn_parser = argparser_from_config(description="Train SSMtabpfn", parser=ssm_tabpfn_parser)
+    tabflex_parser = subparsers.add_parser('tabflex', help='Train a SSMtabpfn model')
+    tabflex_parser.set_defaults(model_type='tabflex')
+    tabflex_parser = argparser_from_config(description="Train SSMtabpfn", parser=tabflex_parser)
 
     ssm_mothernet_parser = subparsers.add_parser('ssm_mothernet', help='Train a ssm_mothernet model')
     ssm_mothernet_parser.set_defaults(model_type='ssm_mothernet')
@@ -104,8 +104,8 @@ def argparser_from_config(parser, description="Train Mothernet"):
     dataloader.set_defaults(**config['dataloader'])
     
     openmlloader = parser.add_argument_group('openmlloader')
-    openmlloader.add_argument('--valid-data', default='new', help='whether to use large dataset', choices = ['new', 'large', 'old'])
-    openmlloader.add_argument('--pca', default = False, help='whether to use pca', action = 'store_true')
+    openmlloader.add_argument('--valid-data', help='whether to use large dataset', choices=['new', 'large', 'old'])
+    openmlloader.add_argument('--pca', help='whether to use pca', action='store_true')
     openmlloader.set_defaults(**config['openmlloader'])
 
 
@@ -118,8 +118,6 @@ def argparser_from_config(parser, description="Train Mothernet"):
         transformer.add_argument('--tabpfn-zero-weights', help='Whether to use zeroing of weights from tabpfn code.', type=str2bool)
         transformer.add_argument('--pre-norm', action='store_true')
         transformer.add_argument('--classification-task', type=str2bool, help='Whether to use classification or regression.')
-        # transformer.add_argument('--model', type = str, choices = ['standard_attention', 'flash_attention'], help = 'which ssm model to use')
-        # transformer.add_argument('--causal-mask', help='Whether to use causal attention', action='store_true', default=False)
         transformer.set_defaults(**config['transformer'])
     elif 'ssm' in config:
         ssm = parser.add_argument_group('ssm')
@@ -130,10 +128,10 @@ def argparser_from_config(parser, description="Train Mothernet"):
         ssm.add_argument('--tabpfn-zero-weights', help='Whether to use zeroing of weights from tabpfn code.', type=str2bool)
         ssm.add_argument('--pre-norm', action='store_true')
         ssm.add_argument('--classification-task', type=str2bool, help='Whether to use classification or regression.')
-        ssm.add_argument('--model', type = str, choices = ['mamba1', 'mamba2', 'linear_attention', 'fla'], help = 'which ssm model to use')
+        ssm.add_argument('--model', type = str, choices = ['linear_attention', 'fla'], help = 'which ssm model to use')
         
         ## specific to fla
-        ssm.add_argument('--feature-map', help='when the model is fla, which feature map to use', type = str, choices = ['identity', 'elu'])
+        ssm.add_argument('--feature-map', help='when the model is fla, which feature map to use', type = str, choices = ['identity', 'elu', 'hedgehog', 'hedgehog_shared'])
         ssm.add_argument('--norm-output', help='when the model is fla, whether to normalize the output of the model', action = 'store_true', default = False)
         ssm.add_argument('--causal-mask', help='when the model is fla, Whether to use causal attention', action='store_true', default=False)
         ssm.set_defaults(**config['ssm'])
@@ -223,7 +221,7 @@ def argparser_from_config(parser, description="Train Mothernet"):
     orchestration = parser.add_argument_group('orchestration')
     orchestration.add_argument('--extra-fast-test', help="whether to use tiny data", action='store_true')
     orchestration.add_argument('--stop-after-epochs', help="for pausing rungs with synetune", type=int, default=None)
-    orchestration.add_argument('--seed-everything', help="whether to seed everything for testing and benchmarking", default = True, type=str2bool)
+    orchestration.add_argument('--seed-everything', help="whether to seed everything for testing and benchmarking", default = False, type=str2bool)
     orchestration.add_argument('--experiment', help="Name of mlflow experiment", default='Default')
     orchestration.add_argument('-R', '--create-new-run', help="Create as new MLFLow run, even if continuing", action='store_true')
     orchestration.add_argument('-B', '--base-path', default='.')

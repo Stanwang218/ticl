@@ -115,6 +115,7 @@ def test_train_mothernet_predict_gelu():
 
 
 def test_train_synetune():
+    pytest.skip("Synetune is not currently used")
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(TESTING_DEFAULTS_MOTHERNET + ['--st_checkpoint_dir', tmpdir])

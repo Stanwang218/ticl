@@ -2,16 +2,16 @@ from sklearn.model_selection import train_test_split
 
 from ticl.datasets import linear_correlated_logistic_regression, linear_correlated_step_function
 from ticl.evaluation.plot_shape_function import plot_shape_function
-from ticl.prediction import MotherNetAdditiveClassifier
-from ticl.utils import get_mn_model
+from ticl.prediction import GAMformerClassifier
+from ticl.utils import fetch_model
 
 
 def logistic_regression(model_string: str):
     X, y = linear_correlated_logistic_regression(
         n_features=3, n_tasks=1, n_datapoints=1000, sampling_correlation=0.0)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
-    model_path = get_mn_model(model_string)
-    classifier = MotherNetAdditiveClassifier(device='cpu', path=model_path)
+    model_path = fetch_model(model_string)
+    classifier = GAMformerClassifier(device='cpu', path=model_path)
     classifier.fit(X_train, y_train)
 
     # Plot shape function
@@ -28,8 +28,8 @@ def step_function(model_string: str):
     X, y = linear_correlated_step_function(
         n_features=2, n_tasks=1, n_datapoints=10000, sampling_correlation=0.0, plot=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
-    model_path = get_mn_model(model_string)
-    classifier = MotherNetAdditiveClassifier(device='cpu', path=model_path)
+    model_path = fetch_model(model_string)
+    classifier = GAMformerClassifier(device='cpu', path=model_path)
     classifier.fit(X_train, y_train)
 
     # Plot shape function

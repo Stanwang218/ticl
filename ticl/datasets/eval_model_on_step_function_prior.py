@@ -4,9 +4,9 @@ import torch
 from sklearn.model_selection import train_test_split
 
 from ticl.evaluation.concurvity import pairwise
-from ticl.prediction import MotherNetAdditiveClassifier
+from ticl.prediction import GAMformerClassifier
 from ticl.priors import StepFunctionPrior
-from ticl.utils import get_mn_model
+from ticl.utils import fetch_model
 
 
 def plot_shape_function(bin_edges: np.ndarray, w: np.ndarray):
@@ -43,8 +43,8 @@ def eval_step_function():
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
     model_string = "baam_H512_Dclass_average_e128_nsamples500_numfeatures20_padzerosFalse_03_14_2024_15_03_22_epoch_400.cpkt"
-    model_path = get_mn_model(model_string)
-    classifier = MotherNetAdditiveClassifier(device='cpu', path=model_path)
+    model_path = fetch_model(model_string)
+    classifier = GAMformerClassifier(device='cpu', path=model_path)
     classifier.fit(X_train, y_train)
     print(classifier)
 

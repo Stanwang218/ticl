@@ -2,9 +2,9 @@ import pickle
 
 import numpy as np
 
-from ticl.prediction import TabPFNClassifier, MotherNetClassifier, MotherNetAdditiveClassifier, MotherNetAdditiveRegressor
+from ticl.prediction import TabPFNClassifier, MotherNetClassifier, GAMformerClassifier, GAMformerRegressor
 from ticl.evaluation.baselines.distill_mlp import DistilledTabPFNMLP
-from ticl.utils import get_mn_model
+from ticl.utils import fetch_model
 
 from sklearn.datasets import load_iris
 from sklearn.pipeline import make_pipeline
@@ -35,7 +35,7 @@ def test_our_tabpfn():
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
     model_string = "tabpfn_nooptimizer_emsize_512_nlayers_12_steps_2048_bs_32ada_lr_0.0001_1_gpu_07_24_2023_01_43_33"
     epoch = "1650"
-    get_mn_model(f"{model_string}_epoch_{epoch}.cpkt")
+    fetch_model(f"{model_string}_epoch_{epoch}.cpkt")
     classifier = TabPFNClassifier(device='cpu', model_string=model_string, epoch=epoch)
     classifier.fit(X_train, y_train)
     print(classifier)
@@ -60,7 +60,7 @@ def test_mothernet_march_2024():
     X, y = load_iris(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
     model_string = "mn_Dclass_average_03_25_2024_17_14_32_epoch_3970.cpkt"
-    model_path = get_mn_model(model_string)
+    model_path = fetch_model(model_string)
     classifier = MotherNetClassifier(device='cpu', path=model_path)
     classifier.fit(X_train, y_train)
     print(classifier)
@@ -73,8 +73,8 @@ def test_additive_mothernet_dense():
     X, y = load_iris(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
     model_string = "additive_1_gpu_02_14_2024_16_34_15_epoch_950_fixed2.cpkt"
-    model_path = get_mn_model(model_string)
-    classifier = MotherNetAdditiveClassifier(device='cpu', path=model_path)
+    model_path = fetch_model(model_string)
+    classifier = GAMformerClassifier(device='cpu', path=model_path)
     classifier.fit(X_train, y_train)
     print(classifier)
     prob = classifier.predict_proba(X_test)
@@ -86,8 +86,8 @@ def test_baam():
     X, y = load_iris(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
     model_string = "baam_categoricalfeaturep0.9_nsamples500_numfeatures20_numfeaturessamplerdouble_sample_sklearnbinningTrue_05_15_2024_20_58_13_epoch_280.cpkt"
-    model_path = get_mn_model(model_string)
-    classifier = MotherNetAdditiveClassifier(device='cpu', path=model_path)
+    model_path = fetch_model(model_string)
+    classifier = GAMformerClassifier(device='cpu', path=model_path)
     classifier.fit(X_train, y_train)
     print(classifier)
     prob = classifier.predict_proba(X_test)
@@ -98,7 +98,7 @@ def test_baam():
 def test_baam_default_model():
     X, y = load_iris(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
-    classifier = MotherNetAdditiveClassifier(device='cpu')
+    classifier = GAMformerClassifier(device='cpu')
     classifier.fit(X_train, y_train)
     print(classifier)
     prob = classifier.predict_proba(X_test)
@@ -112,8 +112,8 @@ def test_baam_regression():
     y = X @ rng.normal(size=(2,)) + 100
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
     model_string = "baam_Daverage_l1e-05_maxnumclasses0_nsamples500_numfeatures10_yencoderlinear_05_08_2024_03_04_01_epoch_40.cpkt"
-    model_path = get_mn_model(model_string)
-    reg = MotherNetAdditiveRegressor(device='cpu', path=model_path)
+    model_path = fetch_model(model_string)
+    reg = GAMformerRegressor(device='cpu', path=model_path)
     reg.fit(X_train, y_train)
     print(reg)
     y_pred = reg.predict(X_test)
@@ -125,9 +125,9 @@ def test_baam_with_nan():
     X, y = load_iris(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
     model_string = "baam_H512_Dclass_average_e128_nsamples500_numfeatures20_padzerosFalse_03_14_2024_15_03_22_epoch_400.cpkt"
-    model_path = get_mn_model(model_string)
+    model_path = fetch_model(model_string)
     X_train[0, 0] = np.nan
-    classifier = MotherNetAdditiveClassifier(device='cpu', path=model_path)
+    classifier = GAMformerClassifier(device='cpu', path=model_path)
     classifier.fit(X_train, y_train)
     print(classifier)
     X_test[0, 0] = np.nan
@@ -141,7 +141,7 @@ def test_distilled_mlp_paper():
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
     model_string = "tabpfn_nooptimizer_emsize_512_nlayers_12_steps_2048_bs_32ada_lr_0.0001_1_gpu_07_24_2023_01_43_33"
     epoch = "1650"
-    get_mn_model(f"{model_string}_epoch_{epoch}.cpkt")
+    fetch_model(f"{model_string}_epoch_{epoch}.cpkt")
     classifier = make_pipeline(StandardScaler(),
                                DistilledTabPFNMLP(n_epochs=100, device='cpu', hidden_size=128, n_layers=2, dropout_rate=.1, learning_rate=0.01,
                                                   model_string=model_string,

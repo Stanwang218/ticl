@@ -21,7 +21,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import BaggingClassifier
 from ticl.prediction.mothernet import ShiftClassifier, EnsembleMeta, MotherNetClassifier
 from sklearn.impute import SimpleImputer
-from ticl.prediction.mothernet_additive import MotherNetAdditiveClassifier
+from ticl.prediction.gamformer import GAMformerClassifier
 
 from interpret.glassbox import ExplainableBoostingClassifier
 
@@ -81,7 +81,7 @@ device_dict = {
     'tabpfn': 'cuda',
     'mlp': 'cuda',
     'logistic': 'cuda',
-    'ssm_tabpfn': 'cuda',
+    'tabflex': 'cuda',
 }
 
 clf_dict= {
@@ -93,15 +93,15 @@ clf_dict= {
     'resnet': resnet_metric,
 }
 
-if 'ssm_tabpfn' in args.model:
-    model_name = 'ssm_tabpfn'
-    ssm_tabpfn = TabPFNClassifier(
+if 'tabflex' in args.model or 'ssm_tabpfn' in args.model:
+    model_name = 'tabflex'
+    tabflex = TabPFNClassifier(
         device = device_dict.get(model_name, 'cpu'),
         model_string = args.model,
         epoch = str(args.epoch),
         N_ensemble_configurations=3,
     )
-    clf_dict[model_name] = ssm_tabpfn
+    clf_dict[model_name] = tabflex
 elif 'tabpfn' in args.model:
     model_name = 'tabpfn'
     tabpfn = TabPFNClassifier(

@@ -16,11 +16,11 @@ class SSMMotherNet(MLPModelPredictor):
                  decoder_embed_dim=2048, classification_task=True,
                  decoder_hidden_layers=1, decoder_hidden_size=None, predicted_hidden_layers=1, weight_embedding_rank=None, y_encoder=None,
                  low_rank_weights=False, tabpfn_zero_weights=True, decoder_activation="relu", predicted_activation="relu",
-                 local_nhead=4, ssm_cfg={}):
+                 ssm_cfg=None):
         super().__init__()
         self.classification_task = classification_task
         nhid = emsize * nhid_factor 
-        
+        ssm_cfg = ssm_cfg or {}
         self.ssm = get_ssm_layers(
             d_model = emsize,
             n_layer = nlayers,

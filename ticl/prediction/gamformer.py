@@ -6,10 +6,10 @@ from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from ticl.model_builder import load_model
-from ticl.models.biattention_additive_mothernet import _determine_is_categorical
+from ticl.models.gamformer import _determine_is_categorical
 from ticl.models.encoders import get_fourier_features
 from ticl.models.utils import bin_data
-from ticl.utils import normalize_data, get_mn_model
+from ticl.utils import normalize_data, fetch_model
 
 
 from interpret.glassbox._ebm._ebm import EBMExplanation
@@ -271,14 +271,14 @@ class ExplainableAdditivePredictor:
         return self
     
 
-class MotherNetAdditiveClassifier(ClassifierMixin, BaseEstimator, ExplainableAdditivePredictor):
+class GAMformerClassifier(ClassifierMixin, BaseEstimator, ExplainableAdditivePredictor):
     def __init__(self, path=None, device="cpu", inference_device="cpu", model=None, config=None, cat_features: List[int] = None):
         self.path = path
         self.device = device
         self.inference_device = inference_device
         if model is None and path is None:
             model_string = "baam_H512_Dclass_average_e128_nsamples500_numfeatures20_padzerosFalse_03_14_2024_15_03_22_epoch_1520.cpkt"
-            path = get_mn_model(model_string)
+            path = fetch_model(model_string)
             self.path = path
         if model is not None and path is not None:
             raise ValueError("Only one of path or model must be provided")
@@ -339,7 +339,7 @@ class MotherNetAdditiveClassifier(ClassifierMixin, BaseEstimator, ExplainableAdd
         return self.classes_[self.predict_proba(X).argmax(axis=1)]
 
 
-class MotherNetAdditiveRegressor(RegressorMixin, BaseEstimator, ExplainableAdditivePredictor):
+class GAMformerRegressor(RegressorMixin, BaseEstimator, ExplainableAdditivePredictor):
     def __init__(self, path=None, device="cpu", inference_device="cpu", model=None, config=None, cat_features: List[int] = None):
         self.path = path
         self.device = device

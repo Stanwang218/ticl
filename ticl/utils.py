@@ -25,7 +25,7 @@ class DownloadProgressBar(tqdm):
         self.update(b * bsize - self.n)
 
 
-def get_mn_model(file_name):
+def fetch_model(file_name):
     model_path = Path(get_module_path()) / 'models_diff' / file_name
     if not model_path.exists():
         url = f'https://amuellermothernet.blob.core.windows.net/models/{file_name}'
@@ -574,15 +574,15 @@ def get_init_method(init_method):
 def validate_model(model, config):
     from ticl.datasets import load_openml_list, open_cc_valid_dids, open_cc_valid_dids_regression, open_cc_large_dids, new_valid_dids
 
-    from ticl.models.biattention_additive_mothernet import BiAttentionMotherNetAdditive
+    from ticl.models.gamformer import GAMformer
     from ticl.models.mothernet_additive import MotherNetAdditive
     from ticl.models.mothernet import MotherNet
     from ticl.models.ssm_mothernet import SSMMotherNet
-    from ticl.models.ssm_tabpfn import SSMTabPFN
+    from ticl.models.tabflex import SSMTabPFN
     from ticl.models.tabpfn import TabPFN
     from ticl.models.perceiver import TabPerceiver
     from ticl.models.biattention_tabpfn import BiAttentionTabPFN
-    from ticl.prediction import MotherNetAdditiveClassifier, MotherNetClassifier, TabPFNClassifier, MotherNetAdditiveRegressor 
+    from ticl.prediction import GAMformerClassifier, MotherNetClassifier, TabPFNClassifier, GAMformerRegressor 
     from ticl.evaluation.tabular_evaluation import eval_on_datasets
     from ticl.evaluation import tabular_metrics
     from uuid import uuid4
@@ -613,8 +613,8 @@ def validate_model(model, config):
             classification=True,
         )
 
-        if isinstance(model, (BiAttentionMotherNetAdditive, MotherNetAdditive)):
-            clf = MotherNetAdditiveClassifier(
+        if isinstance(model, (GAMformer, MotherNetAdditive)):
+            clf = GAMformerClassifier(
                 device=config['device'], 
                 model=model, 
                 config=config
@@ -658,12 +658,13 @@ def validate_model(model, config):
         per_dataset_scores = {key: np.mean([g['mean_metric'] for g in group]) for key, group in itertools.groupby(results, lambda x: x['dataset'])}
         return mean_auc, per_dataset_scores
     else:
+        # regression
         cc_valid_datasets_regression, _ = load_openml_list(
             open_cc_valid_dids_regression, multiclass=False, shuffled=True, filter_for_nan=False, max_samples=10000,
             num_feats=100, return_capped=False, classification=False)
 
-        if isinstance(model, (BiAttentionMotherNetAdditive, MotherNetAdditive)):
-            clf = MotherNetAdditiveRegressor(device=config['device'], model=model, config=config)
+        if isinstance(model, (GAMformer, MotherNetAdditive)):
+            clf = GAMformerRegressor(device=config['device'], model=model, config=config)
         else:
             raise ValueError(f"Model {model} not supported for validation")
         base_path = 'models_diff/validation'

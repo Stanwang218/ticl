@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.nn.modules.transformer import (Dropout, LayerNorm, Linear, Module, Optional, Tensor,
                                           _get_activation_fn)
 from torch.utils.checkpoint import checkpoint
+from torch.nn import MultiheadAttention
 
 import torch
 from torch.nn import Dropout, LayerNorm, Linear, Module
@@ -28,6 +29,8 @@ class BiAttentionEncoderLayer(Module):
         reshaped = reshaped.reshape(src.shape[0], -1, src.shape[-1])
         res = self.cross_sample_attention(reshaped, src_mask)
         return res.reshape(src.shape)
+
+
 
 
 class TransformerEncoderLayer(Module):
@@ -74,7 +77,6 @@ class TransformerEncoderLayer(Module):
         dtype=None, 
         recompute_attn=False,
         attn_name = 'default',
-        feature_map='identity',
         norm_output = False,
     ) -> None:
         # batch_first is set to True for using flash attention II
@@ -82,26 +84,7 @@ class TransformerEncoderLayer(Module):
         
         factory_kwargs = {'device': device, 'dtype': dtype}
         super().__init__()
-
-        if attn_name == 'fla': attn_name = 'flash_linear_attention'
-
-        if (torch.__version__ >= '2.2.0') or (not attn_name in ['default', 'flash_attention']):
-            if attn_name == 'default': attn_name = 'flash_attention'
-            from ticl.models.flash_transformer import MultiheadAttention
-            self.self_attn = MultiheadAttention(
-                d_model, 
-                nhead, 
-                dropout=dropout, 
-                batch_first=batch_first,
-                attn_name = attn_name,
-                feature_map = feature_map,
-                norm_output = norm_output,
-                **factory_kwargs,
-            )
-        else: 
-            # cannot use 'flash_attention'
-            from torch.nn import MultiheadAttention
-            self.self_attn = MultiheadAttention(
+        self.self_attn = MultiheadAttention(
                 d_model, 
                 nhead, 
                 dropout=dropout, 
@@ -214,6 +197,7 @@ class TransformerEncoderLayer(Module):
                     src_mask,
                     True,
                     is_causal,
+                    use_reentrant=True,
                 )[0]
             else:
                 src2 = self.self_attn(
@@ -246,7 +230,7 @@ def get_ssm_layers(
     d_model: int,
     n_layer: int,
     d_intermediate: int,
-    model = 'mamba1',
+    model = 'linear_attention',
     ssm_cfg=None,
     attn_layer_idx=None,
     attn_cfg=None,
@@ -268,33 +252,7 @@ def get_ssm_layers(
 ):
     if dtype is None:
         dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
-    if 'mamba' in model:
-        from ticl.models.mamba import MambaLayer
-        if ssm_cfg is None:
-            ssm_cfg = {
-                'layer': model[0].upper()+model[1:].lower(),
-            }
-        else:
-            ssm_cfg = {
-                'layer': model[0].upper()+model[1:].lower(), 
-                **ssm_cfg,
-            }
-        return MambaLayer(
-            d_model,
-            n_layer,
-            d_intermediate,
-            ssm_cfg=ssm_cfg,
-            attn_layer_idx=attn_layer_idx,
-            attn_cfg=attn_cfg,
-            norm_epsilon=norm_epsilon,
-            rms_norm=rms_norm,
-            initializer_cfg=initializer_cfg,
-            fused_add_norm=fused_add_norm,
-            residual_in_fp32=residual_in_fp32,
-            device=device,
-            dtype=dtype,
-        )
-    elif model == 'linear_attention':
+    if model == 'linear_attention':
         from ticl.models.linear_attention import TransformerEncoderBuilder
 
         if d_model % nheads != 0:
@@ -311,43 +269,27 @@ def get_ssm_layers(
 
         # Build a transformer with linear attention
         builder.attention_type = "linear"
+
+        if feature_map == "hedgehog":
+            from ticl.models.linear_attention import hedgehog_feature_map
+            builder.feature_map = hedgehog_feature_map
+        
+        elif feature_map == "hedgehog_shared":
+            from ticl.models.linear_attention import hedgehog_feature_map
+            shared_feature_map = hedgehog_feature_map(d_model // nheads)
+            builder.feature_map = lambda x: shared_feature_map
+
+        elif feature_map == "elu":
+            from fast_transformers.feature_maps.base import elu_feature_map
+            builder.feature_map = elu_feature_map
+
+        elif feature_map == "identity":
+            from ticl.models.linear_attention import identity_feature_map
+            builder.feature_map = identity_feature_map
+
         linear_model = builder.get()
 
         return linear_model
     
-    elif model in ['fla', 'retnet']:
-        from torch.nn import TransformerEncoder
-        from ticl.models.tabpfn import TransformerEncoderDiffInit
-        # import os 
-        # os.environ['CUDA_LAUNCH_BLOCKING']="1"
-        # os.environ['TORCH_USE_CUDA_DSA'] = "1"          
-
-        if model == 'fla': 
-            attn_name = 'fla'
-        elif model == 'retnet':
-            attn_name = 'retention'
-        
-        def encoder_layer_creator(): return TransformerEncoderLayer(
-            d_model, 
-            nheads,
-            d_intermediate,
-            dropout, 
-            activation = activation, 
-            pre_norm = pre_norm, 
-            recompute_attn = recompute_attn,  
-            attn_name = model,
-            norm_output = norm_output,
-            feature_map = feature_map,
-        )
-        transformer_encoder = TransformerEncoder(
-            encoder_layer_creator(),
-            n_layer,
-        ) if all_layers_same_init else TransformerEncoderDiffInit(encoder_layer_creator, n_layer)
-
-        return transformer_encoder
-    elif model == 'gla':
-        pass
-    elif model == 'retnet':
-        pass
     else:
         raise ValueError(f"Unknown model {model}")

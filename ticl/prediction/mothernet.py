@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler, OneHotEncoder, Q
 from sklearn.feature_selection import SelectKBest
 
 from ticl.model_builder import load_model
-from ticl.utils import normalize_by_used_features_f, normalize_data, get_mn_model
+from ticl.utils import normalize_by_used_features_f, normalize_data, fetch_model
 from ticl.evaluation.baselines.torch_mlp import TorchMLP, NeuralNetwork
 
 
@@ -227,8 +227,8 @@ class MotherNetClassifier(ClassifierMixin, BaseEstimator):
         self.config = config
 
         if path is None and model is None:
-            model_string = "mn_Dclass_average_03_25_2024_17_14_32_epoch_3970.pickle"
-            path = get_mn_model(model_string)
+            model_string = "mn_Dclass_average_03_25_2024_17_14_32_epoch_3970.cpkt"
+            path = fetch_model(model_string)
         self.path = path
 
     def fit(self, X, y):
@@ -277,7 +277,7 @@ class MotherNetInitMLPClassifier(ClassifierMixin, BaseEstimator):
         self.device = device
         if path is None:
             model_string = "mn_d2048_H4096_L2_W32_P512_1_gpu_warm_08_25_2023_21_46_25_epoch_3940_no_optimizer.pickle"
-            path = get_mn_model(model_string)
+            path = fetch_model(model_string)
         self.path = path
         self.learning_rate = learning_rate
         self.n_epochs = n_epochs
@@ -410,7 +410,8 @@ class EnsembleMeta(ClassifierMixin, BaseEstimator):
             X_cat = None
 
         if X_cont.shape[1] > 0:
-            self.quantile_ = QuantileTransformer()
+            n_quantiles = min(1000, X_cont.shape[1])
+            self.quantile_ = QuantileTransformer(n_quantiles=n_quantiles)
             X_cont_quantile = self.quantile_.fit_transform(X_cont)
 
         self.estimators_ = []

@@ -38,18 +38,13 @@ class SSMTabPFN(nn.Module):
         causal_mask = False, 
         norm_output = False,
         feature_map = 'identity',
-        ssm_cfg={},
+        ssm_cfg=None,
     ):
         super().__init__()
         self.classification_task = classification_task
         self.y_encoder = y_encoder_layer
         nhid = emsize * nhid_factor
         self.model = model
-
-        # def encoder_layer_creator(): return TransformerEncoderLayer(emsize, nhead, nhid, dropout, activation=activation,
-        #                                                             pre_norm=pre_norm, recompute_attn=recompute_attn)
-        # self.transformer_encoder = TransformerEncoder(encoder_layer_creator(), nlayers)\
-        #     if all_layers_same_init else TransformerEncoderDiffInit(encoder_layer_creator, nlayers)
         
         self.causal_mask = causal_mask
 
@@ -85,7 +80,6 @@ class SSMTabPFN(nn.Module):
         else:
             x_src, y_src = src
         
-        if self.model == 'mamba1': x_src = x_src.contiguous()
         x_src = self.encoder(x_src) # transform n_features to emsize
         # transform y as one-hot encoding into emsize
         y_src = self.y_encoder(y_src.unsqueeze(-1) if len(y_src.shape) < len(x_src.shape) else y_src)
@@ -106,10 +100,8 @@ class SSMTabPFN(nn.Module):
             src = self.input_ln(src)
             
         # output = self.ssm(src, src_mask)
-        if self.model in ['linear_attention', 'mamba1', 'mamba2']:
+        if self.model in ['linear_attention']:
             output = self.ssm(src, src_mask)
-        elif self.model in ['fla']:
-            output = self.ssm(src, src_mask, is_causal = self.causal_mask)
         else:
             raise NotImplementedError(f"Model {self.model} is not implemented yet.")
         

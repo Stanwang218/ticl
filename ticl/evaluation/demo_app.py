@@ -13,7 +13,7 @@ import pandas as pd
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import make_column_transformer
-from ticl.prediction.mothernet_additive import MotherNetAdditiveClassifier
+from ticl.prediction.gamformer import GAMformerClassifier
 from interpret.glassbox import ExplainableBoostingClassifier
 
 
@@ -26,7 +26,7 @@ import numpy as np
 from bokeh.models import Div, CheckboxButtonGroup
 from sklearn.datasets import load_iris
 
-from ticl.utils import get_mn_model
+from ticl.utils import fetch_model
 
 grid_figures = {}
 
@@ -82,9 +82,9 @@ cont_cols = X_train.dtypes.index[X_train.dtypes != "object"]
 ct = make_column_transformer((OneHotEncoder(sparse_output=False, max_categories=10, handle_unknown='ignore'), X_train.dtypes == object), remainder="passthrough", verbose_feature_names_out=False)
 
 model_string = "baam_H512_Dclass_average_e128_nsamples500_numfeatures20_padzerosFalse_03_14_2024_15_03_22_epoch_1520.cpkt"
-model_path = get_mn_model(model_string)
+model_path = fetch_model(model_string)
 
-additive = MotherNetAdditiveClassifier(path=model_path, device="cuda:3")
+additive = GAMformerClassifier(path=model_path, device="cuda:3")
 # calling fit to read the model to memory
 iris = load_iris()
 additive.fit(iris.data, iris.target)

@@ -54,7 +54,6 @@ def get_ssm_config():
             'd_state': 16,
             'expand': 1,
         },
-        'local_nhead': 4,
         'init_method': None,
         'recompute_attn': True,
         'pre_norm': False,
@@ -64,9 +63,9 @@ def get_ssm_config():
         'input_normalization': False,
         'tabpfn_zero_weights': True,
         'all_layers_same_init': True,
-        'model': 'mamba1',
+        'model': 'linear_attention',
         'causal_mask': False,
-        'feature_map': 'identity',
+        'feature_map': 'elu',
         'norm_output': False,
     }
     return {'ssm': ssm}
@@ -267,11 +266,11 @@ def get_batabpfn_default_config():
     config['prior']['classification']['pad_zeros'] = False
     return config
 
-def get_ssm_tabpfn_default_config(model = 'mamba1'):
+def get_tabflex_default_config():
     config = get_shared_defaults(encoder_type='ssm')
     return config
 
-def get_ssm_mothernet_default_config(model = 'mamba1'):
+def get_ssm_mothernet_default_config():
     config = get_shared_defaults(encoder_type='ssm')
     config.update(get_mothernet_config())
     return config
@@ -289,10 +288,10 @@ def get_model_default_config(model_type, model = None):
         config = get_baam_default_config()
     elif model_type == 'perceiver':
         config = get_perceiver_default_config()
-    elif model_type == 'ssm_tabpfn':
-        config = get_ssm_tabpfn_default_config(model = model)
+    elif model_type in ['tabflex', 'ssm_tabpfn']:
+        config = get_tabflex_default_config()
     elif model_type == 'ssm_mothernet':
-        config = get_ssm_mothernet_default_config(model = model)
+        config = get_ssm_mothernet_default_config()
     else:
         raise ValueError(f"Unknown model type {model_type}")
     config['model_type'] = model_type

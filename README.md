@@ -1,13 +1,21 @@
 # ticl - Tabular In-Context Learning
 
-This repository contains code for training and prediction of several models for tabular in-context learning, including MotherNet and GAMformer.
-MotherNet is a hypernetwork foundational model (or conditional neural process) for tabular data classification that creates a small neural network.
-GAMformer is a model trained to output an interpretable, additive model using in-context learning.
+This repository contains code for training and prediction of several models for tabular in-context learning, including **MotherNet**, **GAMformer** and **TabFlex**.
+**MotherNet** is a hypernetwork foundational model (or conditional neural process) for tabular data classification that creates a small neural network.
+**GAMformer** is a model trained to output an interpretable, additive model using in-context learning.
+**TabFlex** is a extension of ``TabPFN``  using linear attention that overcomes the scaling limitations of ``TabPFN`` in terms of features, models and number of classes.
+
+- [MotherNet](#MotherNet)
+- [GAMformer](#GAMformer)
+- [TabFlex](#TabFlex)
 
 Both the architecture and the code in this repository is based on the [TabPFN](https://github.com/automl/TabPFN) by the [Freiburg AutoML group](https://www.automl.org/).
 
-This is a research prototype, shared for research use, and not meant for real-world applications. Responsibility for using the models contained in this repository,
-as well monitoring and assessing potential impact of the models lies with the user of the code.
+The repository includes code for training and prediction with these models, as well as links to checkpoints for the models used in our publications.
+
+All models provided are research prototypes, shared for research use, and not meant for real-world applications. Responsibility for using the models contained in this repository, as well monitoring and assessing potential impact of the models lies with the user of the code.
+
+# MotherNet
 
 ## Installation
 
@@ -16,10 +24,15 @@ It's recommended to use conda to create an environment using the provided enviro
 ```
 conda create -f environment.yml
 ```
+Then install the package:
+```
+conda activate ticl
+pip install -e .
+```
 
 ## Getting started
 
-A simple usage of our sklearn interface is:
+A simple usage of the MotherNet sklearn interface is:
 ```python
 from sklearn.metrics import accuracy_score
 from sklearn.datasets import load_breast_cancer
@@ -60,6 +73,84 @@ By default, experiments are tracked using MLFlow if the ``MLFLOW_HOSTNAME`` envi
 This work is described in [MotherNet: A Foundational Hypernetwork for Tabular Classification](https://arxiv.org/pdf/2312.08598).
 Please cite that work when using this code. As this work rests on the TabPFN work, I would suggest you also cite their [paper](https://arxiv.org/abs/2207.01848),
 which also provides more background on the methodology.
+
+# GAMformer
+
+WIP
+
+# TabFlex
+
+Recent advances in the field of in-context learning (ICL) have demonstrated impressive performance for tabular classification, exemplified by TabPFN's success on small datasets. However, the quadratic complexity of the attention mechanism limits its applicability to larger datasets. To address this issue, we conduct a comprehensive comparison of popular scalable attention alternatives, including state-space models (SSMs) and linear attention mechanisms, revealing that the inherent causality of SSMs hinders ICL performance for large datasets, while linear attention preserves effectiveness. Leveraging these insights, we introduce TabFlex, a model based on linear attention that supports thousands of features and hundreds of classes, capable of handling datasets with millions of samples. Extensive experiments demonstrate that TabFlex is significantly faster than most existing methods while achieving top-two performance on small datasets among 25 baselines, with a 2xspeedup over TabPFN and a 1.5xspeedup over XGBoost. On large datasets, TabFlex remains efficient (e.g., approximately 5 seconds on the poker-hand dataset, which consists of millions of samples), while achieving relatively solid performance.
+
+---
+
+## **Step 1: Install Environment for TabFlex**
+
+Follow these steps to set up the required environment:
+
+1. Create the Conda environment using the provided file:
+   ```bash
+   git clone https://github.com/microsoft/ticl
+   conda env create -f ticl/tabflex_conda.yaml
+   ```
+2. Clone and install dependencies:
+   ```bash
+   git clone https://github.com/yzeng58/fast-transformers
+   cd fast-transformers
+   pip install -e .
+   cd ../ticl
+   pip install -e .
+   ```
+
+---
+
+## **Step 2: Model Inference**
+
+Below is an example of using TabFlex for logistic classification.
+
+```python
+from ticl.prediction.tabflex import TabFlex
+import torch
+
+# Generate synthetic dataset
+X_train = torch.randn(300, 20)
+coef = torch.randn(20) 
+y_train = (X_train @ coef > 0).int()
+
+X_test = torch.randn(50, 20)
+y_test = (X_test @ coef > 0).int()
+
+# Initialize and train TabFlex model
+tabflex = TabFlex()
+tabflex.fit(X_train, y_train)
+
+# Make predictions
+y_pred = tabflex.predict(X_test)
+
+# Evaluate performance
+acc = (torch.tensor(y_pred) == y_test).float().mean().item()
+print(f"Accuracy: {acc:.4f}")
+```
+
+---
+
+## **Step 3: Test TabFlex on Different Datasets**
+
+To evaluate TabFlex on various datasets, use [TabZilla](https://github.com/yzeng58/tabzilla). Follow these steps:
+
+1. Clone the TabZilla repository:
+   ```bash
+   git clone https://github.com/yzeng58/tabzilla
+   ```
+2. Follow the instructions in the TabZilla README.  
+   - When specifying the `--model_name` parameter, set it to `tabflex`:
+     ```bash
+     --model_name tabflex
+     ```
+
+---
+
+
 
 ## License
 Copyright 2022 Noah Hollmann, Samuel Müller, Katharina Eggensperger, Frank Hutter

@@ -41,7 +41,7 @@ class PriorDataLoader(DataLoader):
         self.epoch_count = 0
         self.model = model
 
-    def gbm(self, epoch=None, tqdm_bar=None, single_eval_pos = None):
+    def gbm(self, epoch=None, single_eval_pos = None):
         # Actually can only sample up to n_samples-1
         if self.random_n_samples:
             single_eval_pos = self.n_samples - self.n_test_samples
@@ -50,12 +50,6 @@ class PriorDataLoader(DataLoader):
         if single_eval_pos is None:
             single_eval_pos = np.random.randint(self.min_eval_pos, self.n_samples)
         # single_eval_pos = 31496
-        
-        # change the description of the progress bar
-        if tqdm_bar is not None:
-            tqdm_bar.set_description(f'| train sample number: {single_eval_pos} | test sample number: {self.n_samples - single_eval_pos}')
-        if wandb.run is not None:
-            wandb.log({'train_train_sample_number': single_eval_pos, 'train_test_sample_number': self.n_samples - single_eval_pos})
         
         batch = self.prior.get_batch(
             batch_size=self.batch_size, 
@@ -76,10 +70,10 @@ class PriorDataLoader(DataLoader):
         return self.gbm(epoch=self.epoch_count)
     
     def iter_safe_gbm(self):
-        tqdm_bar = tqdm(range(self.num_steps))
-        for _ in tqdm_bar:
+        
+        for _ in range(self.num_steps):
             try:
-                yield self.gbm(epoch=self.epoch_count - 1, tqdm_bar = tqdm_bar)
+                yield self.gbm(epoch=self.epoch_count - 1)
             except AssertionError:
                 continue
 

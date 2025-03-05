@@ -1026,14 +1026,14 @@ def mothernet_init_metric(x, y, test_x, test_y, cat_features, metric_used, max_t
                                              one_hot=True, impute=True, standardize=True,
                                              cat_features=cat_features)
     from ticl.prediction.mothernet import MotherNetInitMLPClassifier
-    from ticl.utils import get_mn_model
+    from ticl.utils import fetch_model
     from sklearn.pipeline import make_pipeline
     from sklearn.feature_selection import SelectKBest
 
     def clf_(**params):
         if is_classification(metric_used):
             model_string = "mn_Dclass_average_03_25_2024_17_14_32_epoch_2910.cpkt"
-            model_path = get_mn_model(model_string)
+            model_path = fetch_model(model_string)
             one_hot = params.pop('one_hot', True)
             clf = MotherNetInitMLPClassifier(device=device, path=model_path, **params)
             ohe = OneHotEncoder(handle_unknown='ignore', max_categories=10, sparse_output=False) if one_hot else "passthrough"
