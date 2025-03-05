@@ -31,12 +31,12 @@ def test_train_tabflex_basic():
 def test_train_tabflex_identity():
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
-        results = main(['tabflex'] + TESTING_DEFAULTS + ['-B', tmpdir, '--feature-map', 'identity'])
+        results = main(['tabflex'] + TESTING_DEFAULTS + ['-B', tmpdir, '--feature-map', 'identity_for_real'])
         clf = TabPFNClassifier(device='cpu', model_string=results['model_string'], epoch=results['epoch'], base_path=results['base_path'])
         check_predict_iris(clf)
     assert isinstance(results['model'], SSMTabPFN)
     assert count_parameters(results['model']) == 580106
-    assert results['model_string'].startswith("tabflex_AFalse_e128_E10_featuremapidentity_N4_n1_tFalse_cpu")
+    assert results['model_string'].startswith("tabflex_AFalse_e128_E10_featuremapidentity_for_real_N4_n1_tFalse_cpu")
     assert results['loss'] == pytest.approx(0.706233680248260, rel=1e-4)
 
 

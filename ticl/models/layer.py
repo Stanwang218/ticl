@@ -279,11 +279,11 @@ def get_ssm_layers(
             shared_feature_map = hedgehog_feature_map(d_model // nheads)
             builder.feature_map = lambda x: shared_feature_map
 
-        elif feature_map == "elu":
+        elif feature_map in ["identity", "elu"]:
             from fast_transformers.feature_maps.base import elu_feature_map
             builder.feature_map = elu_feature_map
 
-        elif feature_map == "identity":
+        elif feature_map == "identity_for_real":
             from ticl.models.linear_attention import identity_feature_map
             builder.feature_map = identity_feature_map
 
