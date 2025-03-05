@@ -453,21 +453,24 @@ def get_ssm_layers(
             from ticl.models.linear_attention import identity_feature_map
             feature_map_func = identity_feature_map
 
-        attention_layer = AttentionLayer(
-            attention=LinearAttention(query_dimensions=d_model // nheads, feature_map=feature_map_func),
-            d_model=d_model,
-            n_heads=nheads,
-            d_keys=d_model // nheads,
-            d_values=d_model // nheads,
-        )
+
+        def attention_layer_creator():
+            return AttentionLayer(
+                attention=LinearAttention(query_dimensions=d_model // nheads, feature_map=feature_map_func),
+                d_model=d_model,
+                n_heads=nheads,
+                d_keys=d_model // nheads,
+                d_values=d_model // nheads)
+        
         def encoder_layer_creator():
             return LinearAttentionTransformerEncoderLayer(
-                attention=attention_layer,
+                attention=attention_layer_creator(),
                 d_model=d_model,
                 d_ff=d_intermediate,
                 dropout=dropout,
                 activation=activation)
-        linear_model = TransformerEncoderSimple(encoder_layer_creator=encoder_layer_creator, num_layers=n_layer)
+        # TODO is norm good here?
+        linear_model = TransformerEncoderSimple(encoder_layer_creator=encoder_layer_creator, num_layers=n_layer, norm=LayerNorm(d_model))
         # # Create the builder for our transformers
         # builder = TransformerEncoderBuilder.from_kwargs(
         #     n_layers=n_layer,
