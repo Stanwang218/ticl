@@ -268,7 +268,7 @@ def get_tabflex_default_config():
     config = get_shared_defaults(encoder_type='ssm')
     return config
 
-def get_ssm_mothernet_default_config():
+def get_la_mothernet_default_config():
     config = get_shared_defaults(encoder_type='ssm')
     config.update(get_mothernet_config())
     return config
@@ -288,8 +288,8 @@ def get_model_default_config(model_type, model = None):
         config = get_perceiver_default_config()
     elif model_type in ['tabflex', 'ssm_tabpfn']:
         config = get_tabflex_default_config()
-    elif model_type == 'ssm_mothernet':
-        config = get_ssm_mothernet_default_config()
+    elif model_type == 'la_mothernet':
+        config = get_la_mothernet_default_config()
     else:
         raise ValueError(f"Unknown model type {model_type}")
     config['model_type'] = model_type

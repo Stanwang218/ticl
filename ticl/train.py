@@ -64,7 +64,7 @@ def train_epoch(
             cm = nullcontext()
         with cm:
             with autocast(dtype=torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16) if scaler is not None else nullcontext():
-                # for mothernet, ssm_mothernet, model is MLPModelPredictor from ticl.py
+                # for mothernet, la_mothernet, model is MLPModelPredictor from ticl.py
                 output = model(
                     tuple(e.to(device) if torch.is_tensor(e) else e for e in data)
                     if isinstance(data, tuple) else data.to(device), 

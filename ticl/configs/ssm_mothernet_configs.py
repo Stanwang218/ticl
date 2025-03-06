@@ -104,27 +104,27 @@ if '__main__' == __name__:
     new_configs = pd.DataFrame(final_configs)
     if args.head: new_configs = new_configs.head(1)
 
-    if (not args.head) and os.path.exists('ssm_mothernet_configs.csv'):
-        user_input = input("Old configs detected. Do you want to directly overwrite the original ssm_mothernet configs? (y/n): ")
+    if (not args.head) and os.path.exists('la_mothernet_configs.csv'):
+        user_input = input("Old configs detected. Do you want to directly overwrite the original la_mothernet configs? (y/n): ")
         if user_input.lower() in ['y', 'yes']:
-            new_configs.to_csv('ssm_mothernet_configs.csv', index=False, header=True)
-            pd.DataFrame(new_configs.index).to_csv('ssm_mothernet_configs_index.csv', index=False, header=False)
+            new_configs.to_csv('la_mothernet_configs.csv', index=False, header=True)
+            pd.DataFrame(new_configs.index).to_csv('la_mothernet_configs_index.csv', index=False, header=False)
             exit(0)
         
-        origin_configs = pd.read_csv('ssm_mothernet_configs.csv', header=0)
+        origin_configs = pd.read_csv('la_mothernet_configs.csv', header=0)
         
         # Find additional configs
         additional_configs = new_configs.merge(origin_configs, how='left', indicator=True).loc[lambda x : x['_merge']=='left_only'].drop('_merge', axis=1).reset_index(drop=True)
-        additional_configs.to_csv('additional_ssm_mothernet_configs.csv', index=False, header=True)
-        pd.DataFrame(additional_configs.index).to_csv('additional_ssm_mothernet_configs_index.csv', index=False, header=False)
+        additional_configs.to_csv('additional_la_mothernet_configs.csv', index=False, header=True)
+        pd.DataFrame(additional_configs.index).to_csv('additional_la_mothernet_configs_index.csv', index=False, header=False)
         
         while 1:
             print('Get additional configs.')
             # Ask the user if they want to overwrite the original configs
-            user_input = input("Do you want to overwrite the original ssm_mothernet configs? (y/n): ")
+            user_input = input("Do you want to overwrite the original la_mothernet configs? (y/n): ")
             if user_input.lower() in ['y', 'yes']:
-                new_configs.to_csv('ssm_mothernet_configs.csv', index=False, header=True)
-                pd.DataFrame(new_configs.index).to_csv('ssm_mothernet_configs_index.csv', index=False, header=False)
+                new_configs.to_csv('la_mothernet_configs.csv', index=False, header=True)
+                pd.DataFrame(new_configs.index).to_csv('la_mothernet_configs_index.csv', index=False, header=False)
                 print('Data overwritten!')
                 break
             elif user_input.lower() in ['n', 'no']:
@@ -133,5 +133,5 @@ if '__main__' == __name__:
             else:
                 print("Invalid input!")
     else:
-        new_configs.to_csv('ssm_mothernet_configs.csv', index=False, header=True)
-        pd.DataFrame(new_configs.index).to_csv('ssm_mothernet_configs_index.csv', index=False, header=False)
+        new_configs.to_csv('la_mothernet_configs.csv', index=False, header=True)
+        pd.DataFrame(new_configs.index).to_csv('la_mothernet_configs_index.csv', index=False, header=False)

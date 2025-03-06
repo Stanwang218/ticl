@@ -356,7 +356,7 @@ class LinearAttentionTransformerEncoderLayer(Module):
 
 
 
-def get_ssm_layers(
+def get_linear_attention_layers(
     d_model: int,
     n_layer: int,
     d_intermediate: int,

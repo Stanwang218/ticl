@@ -63,9 +63,9 @@ def make_model_level_argparser(description="Train transformer-style model on syn
     tabflex_parser.set_defaults(model_type='tabflex')
     tabflex_parser = argparser_from_config(description="Train TabFlex", parser=tabflex_parser)
 
-    ssm_mothernet_parser = subparsers.add_parser('ssm_mothernet', help='Train a ssm_mothernet model')
-    ssm_mothernet_parser.set_defaults(model_type='ssm_mothernet')
-    ssm_mothernet_parser = argparser_from_config(description="Train SSMMothernet", parser=ssm_mothernet_parser)
+    la_mothernet_parser = subparsers.add_parser('la_mothernet', help='Train a la_mothernet model')
+    la_mothernet_parser.set_defaults(model_type='la_mothernet')
+    la_mothernet_parser = argparser_from_config(description="Train SSMMothernet", parser=la_mothernet_parser)
 
     return parser
 
@@ -143,7 +143,7 @@ def argparser_from_config(parser, description="Train Mothernet"):
         biattention.add_argument('--input-embedding', type=str, help='input embedding type')
         biattention.set_defaults(**config['biattention'])
 
-    if model_type in ['mothernet', 'additive', 'baam', 'perceiver', 'ssm_mothernet']:
+    if model_type in ['mothernet', 'additive', 'baam', 'perceiver', 'la_mothernet']:
         mothernet = parser.add_argument_group('mothernet')
         mothernet.add_argument('-d', '--decoder-embed-dim', type=int, help='decoder embedding size')
         mothernet.add_argument('-H', '--decoder-hidden-size', type=int, help='decoder hidden size')

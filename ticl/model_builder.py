@@ -261,8 +261,8 @@ def get_model(
             y_encoder_layer=y_encoder, 
             **config['ssm']
         )
-    elif model_type == 'ssm_mothernet':
-        from ticl.models.ssm_mothernet import SSMMotherNet
+    elif model_type == 'la_mothernet':
+        from ticl.models.la_mothernet import SSMMotherNet
         model = SSMMotherNet(
             n_out=n_out, 
             y_encoder_layer=y_encoder, 

@@ -577,7 +577,7 @@ def validate_model(model, config):
     from ticl.models.gamformer import GAMformer
     from ticl.models.mothernet_additive import MotherNetAdditive
     from ticl.models.mothernet import MotherNet
-    from ticl.models.ssm_mothernet import SSMMotherNet
+    from ticl.models.la_mothernet import SSMMotherNet
     from ticl.models.tabflex import TabFlex
     from ticl.models.tabpfn import TabPFN
     from ticl.models.perceiver import TabPerceiver

@@ -2,7 +2,7 @@ import torch, wandb
 import torch.nn as nn 
 
 from ticl.models.encoders import Linear
-from ticl.models.linear_attention import get_ssm_layers
+from ticl.models.linear_attention import get_linear_attention_layers
 
 from ticl.utils import SeqBN
 
@@ -41,7 +41,7 @@ class TabFlex(nn.Module):
         nhid = emsize * nhid_factor
         self.model = model
         
-        self.ssm = get_ssm_layers(
+        self.ssm = get_linear_attention_layers(
             d_model = emsize,
             n_layer = nlayers,
             d_intermediate = nhid,
