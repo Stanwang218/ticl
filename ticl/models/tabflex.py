@@ -81,14 +81,9 @@ class SSMTabPFN(nn.Module):
         # transform y as one-hot encoding into emsize
         y_src = self.y_encoder(y_src.unsqueeze(-1) if len(y_src.shape) < len(x_src.shape) else y_src)
 
-        # What does src_mask do here?
-        if src_mask is None:
-            full_len = len(x_src)
-            if self.efficient_eval_masking:
-                src_mask = single_eval_pos # tell us when to cut the sequence
-            else:
-                src_mask = self.generate_D_q_matrix(full_len, len(x_src) - single_eval_pos).to(x_src.device)
-
+        assert src_mask is None
+        assert self.efficient_eval_masking
+        
         train_x = x_src[:single_eval_pos] + y_src[:single_eval_pos]
         src = torch.cat([train_x, x_src[single_eval_pos:]], 0) # concatenate the training sequence and the test point
         # we have many testing point...
@@ -100,7 +95,7 @@ class SSMTabPFN(nn.Module):
         if self.model in ['linear_attention']:
             src = src.permute(1, 0, 2) # (seq_len, batch_size, emsize) -> (batch_size, seq_len, emsize)
             # the linear attention layers is written for batch_first = True
-            output = self.ssm(src, src_mask)
+            output = self.ssm(src, single_eval_pos)
             output = output.permute(1, 0, 2)
         else:
             raise NotImplementedError(f"Model {self.model} is not implemented yet.")
