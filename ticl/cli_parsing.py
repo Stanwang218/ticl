@@ -59,9 +59,9 @@ def make_model_level_argparser(description="Train transformer-style model on syn
     baam_parser.set_defaults(model_type='baam')
     baam_parser = argparser_from_config(description="Train baam", parser=baam_parser)
     
-    tabflex_parser = subparsers.add_parser('tabflex', help='Train a SSMtabpfn model')
+    tabflex_parser = subparsers.add_parser('tabflex', help='Train a TabFlex model')
     tabflex_parser.set_defaults(model_type='tabflex')
-    tabflex_parser = argparser_from_config(description="Train SSMtabpfn", parser=tabflex_parser)
+    tabflex_parser = argparser_from_config(description="Train TabFlex", parser=tabflex_parser)
 
     ssm_mothernet_parser = subparsers.add_parser('ssm_mothernet', help='Train a ssm_mothernet model')
     ssm_mothernet_parser.set_defaults(model_type='ssm_mothernet')

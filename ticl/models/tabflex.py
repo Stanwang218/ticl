@@ -1,16 +1,12 @@
 import torch, wandb
 import torch.nn as nn 
 
-import numpy as np
-
 from ticl.models.encoders import Linear
 from ticl.models.linear_attention import get_ssm_layers
 
 from ticl.utils import SeqBN
 
-import pdb
-
-class SSMTabPFN(nn.Module):
+class TabFlex(nn.Module):
     def __init__(
         self, 
         *, 

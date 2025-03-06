@@ -578,7 +578,7 @@ def validate_model(model, config):
     from ticl.models.mothernet_additive import MotherNetAdditive
     from ticl.models.mothernet import MotherNet
     from ticl.models.ssm_mothernet import SSMMotherNet
-    from ticl.models.tabflex import SSMTabPFN
+    from ticl.models.tabflex import TabFlex
     from ticl.models.tabpfn import TabPFN
     from ticl.models.perceiver import TabPerceiver
     from ticl.models.biattention_tabpfn import BiAttentionTabPFN
@@ -625,7 +625,7 @@ def validate_model(model, config):
                 model=model, 
                 config=config
             )
-        elif isinstance(model, (TabPFN, BiAttentionTabPFN, SSMTabPFN)):
+        elif isinstance(model, (TabPFN, BiAttentionTabPFN, TabFlex)):
             clf = TabPFNClassifier(
                 device=config['device'], 
                 model=model, 
