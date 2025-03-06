@@ -468,7 +468,8 @@ def get_ssm_layers(
                 d_model=d_model,
                 d_ff=d_intermediate,
                 dropout=dropout,
-                activation=activation)
+                # activation=activation
+                )
         # TODO is norm good here?
         linear_model = TransformerEncoderSimple(encoder_layer_creator=encoder_layer_creator, num_layers=n_layer, norm=LayerNorm(d_model))
         # # Create the builder for our transformers
