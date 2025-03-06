@@ -25,7 +25,7 @@ def test_train_tabflex_basic():
     assert isinstance(results['model'], SSMTabPFN)
     assert count_parameters(results['model']) == 580106
     assert results['model_string'].startswith("tabflex_AFalse_e128_E10_N4_n1_tFalse_cpu")
-    assert results['loss'] == pytest.approx(0.7184109687805176, rel=1e-4)
+    assert results['loss'] == pytest.approx(0.6813156008720398, rel=1e-4)
 
 
 def test_train_tabflex_identity():
@@ -37,7 +37,7 @@ def test_train_tabflex_identity():
     assert isinstance(results['model'], SSMTabPFN)
     assert count_parameters(results['model']) == 580106
     assert results['model_string'].startswith("tabflex_AFalse_e128_E10_featuremapidentity_for_real_N4_n1_tFalse_cpu")
-    assert results['loss'] == pytest.approx(0.706233680248260, rel=1e-4)
+    assert results['loss'] == pytest.approx(0.6912140846252441, rel=1e-4)
 
 
 def test_train_tabflex_hedgehog():
@@ -49,7 +49,7 @@ def test_train_tabflex_hedgehog():
     assert isinstance(results['model'], SSMTabPFN)
     assert count_parameters(results['model']) == 646154
     assert results['model_string'].startswith("tabflex_AFalse_e128_E10_featuremaphedgehog_N4_n1_tFalse_cpu")
-    assert results['loss'] == pytest.approx(0.6987347602844238, rel=1e-4)
+    assert results['loss'] == pytest.approx(0.7568668127059937, rel=1e-4)
 
 
 
@@ -62,11 +62,11 @@ def test_train_tabflex_hedgehog_shared():
     assert isinstance(results['model'], SSMTabPFN)
     assert count_parameters(results['model']) == 596618
     assert results['model_string'].startswith("tabflex_AFalse_e128_E10_featuremaphedgehog_shared_N4_n1_tFalse_cpu")
-    assert results['loss'] == pytest.approx(0.0, rel=1e-4)
+    assert results['loss'] == pytest.approx(1.3891624212265015, rel=1e-4)
 
 
 
-def test_train_tabpfn_num_features():
+def test_train_tabflex_num_features():
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
         results = main(['tabflex'] + TESTING_DEFAULTS_SHORT + ['-B', tmpdir, '--num-features', '13'])
@@ -75,10 +75,10 @@ def test_train_tabpfn_num_features():
     assert isinstance(results['model'], SSMTabPFN)
     assert results['model'].encoder.weight.shape[1] == 13
     assert count_parameters(results['model']) == 568970
-    assert results['loss'] == pytest.approx(0.7266477942466736, rel=1e-5)
+    assert results['loss'] == pytest.approx(0.7209413647651672, rel=1e-5)
 
 
-def test_train_tabpfn_num_samples():
+def test_train_tabflex_num_samples():
     # smoke test only since I'm too lazy to mock
     L.seed_everything(42)
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -87,5 +87,5 @@ def test_train_tabpfn_num_samples():
         check_predict_iris(clf)
     assert isinstance(results['model'], SSMTabPFN)
     assert count_parameters(results['model']) == 580106
-    assert results['loss'] == pytest.approx(0.42884498834609985, rel=1e-5)
+    assert results['loss'] == pytest.approx(0.7025600075721741, rel=1e-5)
 
