@@ -35,7 +35,6 @@ class SSMTabPFN(nn.Module):
         y_encoder=None, 
         tabpfn_zero_weights=False,
         local_nhead=4, 
-        causal_mask = False, 
         norm_output = False,
         feature_map = 'identity',
         ssm_cfg=None,
@@ -46,8 +45,6 @@ class SSMTabPFN(nn.Module):
         nhid = emsize * nhid_factor
         self.model = model
         
-        self.causal_mask = causal_mask
-
         self.ssm = get_ssm_layers(
             d_model = emsize,
             n_layer = nlayers,

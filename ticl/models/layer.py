@@ -191,17 +191,17 @@ class TransformerEncoderLayer(Module):
             if self.recompute_attn:
                 # this might have some problems, double check
                 # https://github.com/pytorch/pytorch/issues/99282
+
                 src2 = checkpoint(
                     self.self_attn, 
-                    src_, 
-                    src_, 
-                    src_, 
-                    # need_weights if specified returns attn_output_weights 
-                    # in addition to attn_outputs
-                    True, 
-                    src_mask,
-                    True,
-                    False,
+                    src_, # query: Tensor,
+                    src_, # key: Tensor,
+                    src_, # value: Tensor,
+                    None, # key_padding_mask: Optional[Tensor] = None,
+                    False, # need_weights: bool = True,
+                    src_mask, # attn_mask: Optional[Tensor] = None,
+                    True, # average_attn_weights: bool = True,
+                    False, # is_causal : bool = False) -> Tuple[Tensor, Optional[Tensor]]:
                     use_reentrant=True,
                 )[0]
             else:

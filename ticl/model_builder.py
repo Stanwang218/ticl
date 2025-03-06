@@ -254,6 +254,7 @@ def get_model(
             y_encoder_layer=y_encoder, **config['transformer'], **config['mothernet'], **config['additive'])
     elif model_type in ['tabflex', 'ssm_tabpfn']:
         from ticl.models.tabflex import SSMTabPFN
+        config['ssm'].pop('causal_mask', None)
         model = SSMTabPFN(
             n_out=n_out, 
             n_features=n_features, 

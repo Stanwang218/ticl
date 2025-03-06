@@ -8,7 +8,7 @@ from ticl.models.encoders import Linear
 
 
 class TabPFN(nn.Module):
-    def __init__(self, *, n_out, emsize, nhead, nhid_factor, nlayers, n_features, causal_mask=False, dropout=0.0,  y_encoder_layer=None,
+    def __init__(self, *, n_out, emsize, nhead, nhid_factor, nlayers, n_features, dropout=0.0,  y_encoder_layer=None,
                  decoder=None, input_normalization=False, init_method=None, pre_norm=False,
                  activation='gelu', recompute_attn=False, classification_task=True,
                  all_layers_same_init=False, efficient_eval_masking=True, y_encoder=None, tabpfn_zero_weights=False):
@@ -16,8 +16,6 @@ class TabPFN(nn.Module):
         self.classification_task = classification_task
         self.y_encoder = y_encoder_layer
         nhid = emsize * nhid_factor
-
-        self.causal_mask = causal_mask
 
         def encoder_layer_creator(): return TransformerEncoderLayer(
             emsize, 
@@ -80,7 +78,7 @@ class TabPFN(nn.Module):
         if self.input_ln is not None:
             src = self.input_ln(src)
 
-        output = self.transformer_encoder(src, src_mask, is_causal = self.causal_mask)
+        output = self.transformer_encoder(src, src_mask)
         # decoder is some position-wise operation
         output = self.decoder(output)
         return output[single_eval_pos:]

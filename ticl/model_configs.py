@@ -39,7 +39,6 @@ def get_transformer_config():
         'input_normalization': False,
         'tabpfn_zero_weights': True,
     #    'model': 'standard_attention',
-    #    'causal_mask': False,
     }
     return {'transformer': transformer}
 
@@ -64,7 +63,6 @@ def get_ssm_config():
         'tabpfn_zero_weights': True,
         'all_layers_same_init': False,
         'model': 'linear_attention',
-        'causal_mask': False,
         'feature_map': 'elu',
         'norm_output': False,
     }
