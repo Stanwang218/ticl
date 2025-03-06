@@ -86,18 +86,11 @@ Recent advances in the field of in-context learning (ICL) have demonstrated impr
 
 ## **Step 1: Install Environment for TabFlex**
 
-Follow these steps to set up the required environment:
+Create the Conda environment using the provided file:
 
-1. Create the Conda environment using the provided file:
    ```bash
    git clone https://github.com/microsoft/ticl
    conda env create -f ticl/tabflex_conda.yaml
-   ```
-2. Clone and install dependencies:
-   ```bash
-   git clone https://github.com/yzeng58/fast-transformers
-   cd fast-transformers
-   pip install -e .
    cd ../ticl
    pip install -e .
    ```
