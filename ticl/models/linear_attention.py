@@ -6,12 +6,6 @@ import math
 from ticl.models.layer import TransformerEncoderSimple
 
 
-from fast_transformers.masking import LengthMask
-from fast_transformers.builders.attention_builders import AttentionBuilder
-from fast_transformers.transformers import TransformerEncoder
-from fast_transformers.builders.transformer_builders import BaseTransformerEncoderBuilder
-
-
 class AttentionLayer(Module):
     """Implement the attention layer. Namely project the inputs to multi-head
     queries, keys and values, call the attention implementation and then
@@ -220,8 +214,7 @@ class LinearAttention(Module):
                           module for dispatching events (default: the default
                           global dispatcher)
     """
-    def __init__(self, query_dimensions, feature_map=None, eps=1e-6,
-                 event_dispatcher=""):
+    def __init__(self, query_dimensions, feature_map=None, eps=1e-6):
         super(LinearAttention, self).__init__()
         self.feature_map = (
             feature_map(query_dimensions) if feature_map else
@@ -294,7 +287,7 @@ class LinearAttentionTransformerEncoderLayer(Module):
         self.dropout = Dropout(dropout)
         self.activation = getattr(F, activation)
 
-    def forward(self, x, src_mask = None, length_mask=None):
+    def forward(self, x, src_mask=None):
         """Apply the transformer encoder to the input x.
 
         Arguments
@@ -302,24 +295,16 @@ class LinearAttentionTransformerEncoderLayer(Module):
             x: The input features of shape (N, L, E) where N is the batch size,
                L is the sequence length (padded) and E is d_model passed in the
                constructor.
-            attn_mask: An implementation of fast_transformers.masking.BaseMask
-                       that encodes where each element of x can attend to.
-            length_mask: An implementation of
-                         fast_transformers.masking.BaseMask that encodes how
-                         many elements each sequence in the batch consists of.
+            src_mask: None or int
+                Split the input into two parts. The first part is the training
+                samples and the second part is the testing samples.
         """
-
-        # Normalize the masks
-        batch_size, num_samples, d_model = x.shape
 
         if isinstance(src_mask, int):
             # tabpfn
             single_eval_position = src_mask
             train_samples = x[:,:single_eval_position,:]
             test_samples = x[:,single_eval_position:,:]
-
-            num_train_samples = train_samples.shape[1]
-            num_test_samples = test_samples.shape[1]
 
             src_mask = None
 
@@ -346,16 +331,17 @@ class LinearAttentionTransformerEncoderLayer(Module):
 
             attn_output = torch.cat([attn_left, attn_right], dim=1)
         else:
+            raise ValueError("Not implemented")
             # mothernet
             # attn_mask = FullMask(num_samples, device=x.device)
-            length_mask = length_mask or \
-            LengthMask(x.new_full((batch_size,), num_samples, dtype=torch.int64))
-            attn_output = self.attention(
-                x, x, x,
-                attn_mask=src_mask,
-                query_lengths=length_mask,
-                key_lengths=length_mask
-            )
+            # length_mask = length_mask or \
+            # LengthMask(x.new_full((batch_size,), num_samples, dtype=torch.int64))
+            # attn_output = self.attention(
+            #     x, x, x,
+            #     attn_mask=src_mask,
+            #     query_lengths=length_mask,
+            #     key_lengths=length_mask
+            # )
 
         x = x + self.dropout(attn_output)
 
@@ -367,41 +353,7 @@ class LinearAttentionTransformerEncoderLayer(Module):
         output = self.norm2(x+y)
 
         return output
-      
-class TransformerEncoderBuilder(BaseTransformerEncoderBuilder):
-    """Build a batch transformer encoder for training or processing of
-    sequences all elements at a time.
 
-    Example usage:
-
-        builder = TransformerEncoderBuilder()
-        builder.n_layers = 12
-        builder.n_heads = 8
-        builder.feed_forward_dimensions = 1024
-        builder.query_dimensions = 64
-        builder.value_dimensions = 64
-        builder.dropout = 0.1
-        builder.attention_dropout = 0.1
-        builder.attention_type = "linear"
-        transformer = builder.get()
-    """
-    def _get_attention_builder(self):
-        """Return an instance of the appropriate attention builder."""
-        return AttentionBuilder()
-
-    def _get_attention_layer_class(self):
-        """Return the class for the layer that projects queries keys and
-        values."""
-        return AttentionLayer
-
-    def _get_encoder_class(self):
-        """Return the class for the transformer encoder."""
-        return TransformerEncoder
-
-    def _get_encoder_layer_class(self):
-        """Return the class for the transformer encoder layer."""
-        return LinearAttentionTransformerEncoderLayer
-    
 
 
 def get_ssm_layers(
@@ -431,7 +383,6 @@ def get_ssm_layers(
     if dtype is None:
         dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
     if model == 'linear_attention':
-        # from ticl.models.linear_attention import TransformerEncoderBuilder
 
         if d_model % nheads != 0:
             raise ValueError(f"nheads {nheads} must divide d_model {d_model}!")
@@ -446,7 +397,7 @@ def get_ssm_layers(
             feature_map_func = lambda x: shared_feature_map
 
         elif feature_map in ["identity", "elu"]:
-            from fast_transformers.feature_maps.base import elu_feature_map
+            from ticl.models.linear_attention import elu_feature_map
             feature_map_func = elu_feature_map
 
         elif feature_map == "identity_for_real":
@@ -472,22 +423,8 @@ def get_ssm_layers(
                 )
         # TODO is norm good here?
         linear_model = TransformerEncoderSimple(encoder_layer_creator=encoder_layer_creator, num_layers=n_layer, norm=LayerNorm(d_model))
-        # # Create the builder for our transformers
-        # builder = TransformerEncoderBuilder.from_kwargs(
-        #     n_layers=n_layer,
-        #     n_heads=nheads,
-        #     query_dimensions=d_model // nheads,
-        #     value_dimensions=d_model // nheads,
-        #     feed_forward_dimensions=d_intermediate,
-        # )
-
-        # # Build a transformer with linear attention
-        # builder.attention_type = "linear"
-        # builder.feature_map = feature_map_func
 
 
-
-        # linear_model = builder.get()
 
         return linear_model
     
