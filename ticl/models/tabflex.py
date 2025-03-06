@@ -33,7 +33,7 @@ class TabFlex(nn.Module):
         local_nhead=4, 
         norm_output = False,
         feature_map = 'identity',
-        ssm_cfg=None,
+        linear_attention_cfg=None,
     ):
         super().__init__()
         self.classification_task = classification_task
@@ -41,17 +41,17 @@ class TabFlex(nn.Module):
         nhid = emsize * nhid_factor
         self.model = model
         
-        self.ssm = get_linear_attention_layers(
+        self.linear_attention = get_linear_attention_layers(
             d_model = emsize,
             n_layer = nlayers,
             d_intermediate = nhid,
             model = model,
             nheads = nhead,
-            ssm_cfg = ssm_cfg,
+            linear_attention_cfg = linear_attention_cfg,
             norm_output = norm_output,
             feature_map = feature_map,
         )
-        backbone_size = sum(p.numel() for p in self.ssm.parameters())
+        backbone_size = sum(p.numel() for p in self.linear_attention.parameters())
         if wandb.run: wandb.log({"backbone_size": backbone_size})
         print("Number of parameters in backbone: ", backbone_size)
 
@@ -87,11 +87,11 @@ class TabFlex(nn.Module):
         if self.input_ln is not None:
             src = self.input_ln(src)
             
-        # output = self.ssm(src, src_mask)
+        # output = self.linear_attention(src, src_mask)
         if self.model in ['linear_attention']:
             src = src.permute(1, 0, 2) # (seq_len, batch_size, emsize) -> (batch_size, seq_len, emsize)
             # the linear attention layers is written for batch_first = True
-            output = self.ssm(src, single_eval_pos)
+            output = self.linear_attention(src, single_eval_pos)
             output = output.permute(1, 0, 2)
         else:
             raise NotImplementedError(f"Model {self.model} is not implemented yet.")

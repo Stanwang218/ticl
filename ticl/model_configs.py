@@ -42,14 +42,14 @@ def get_transformer_config():
     }
     return {'transformer': transformer}
 
-def get_ssm_config():
-    ssm = {
+def get_linear_attention_config():
+    linear_attention = {
         "emsize": 512,
         "nlayers": 12,
         "dropout": 0.0,
         "nhid_factor": 2,
         'nhead': 512 // 128,
-        'ssm_cfg': {
+        'linear_attention_cfg': {
             'd_state': 16,
             'expand': 1,
         },
@@ -66,7 +66,7 @@ def get_ssm_config():
         'feature_map': 'elu',
         'norm_output': False,
     }
-    return {'ssm': ssm}
+    return {'linear_attention': linear_attention}
 
 
 def get_prior_config(max_features=100, n_samples=1024+128):
@@ -211,8 +211,8 @@ def get_shared_defaults(encoder_type = 'transformer'):
     config.update(get_optimizer_config())
     if encoder_type == 'transformer':
         config.update(get_transformer_config())
-    elif encoder_type == 'ssm':
-        config.update(get_ssm_config())
+    elif encoder_type == 'linear_attention':
+        config.update(get_linear_attention_config())
     else:
         raise ValueError(f"Unknown encoder type {encoder_type}")
     return config
@@ -265,11 +265,11 @@ def get_batabpfn_default_config():
     return config
 
 def get_tabflex_default_config():
-    config = get_shared_defaults(encoder_type='ssm')
+    config = get_shared_defaults(encoder_type='linear_attention')
     return config
 
 def get_la_mothernet_default_config():
-    config = get_shared_defaults(encoder_type='ssm')
+    config = get_shared_defaults(encoder_type='linear_attention')
     config.update(get_mothernet_config())
     return config
 

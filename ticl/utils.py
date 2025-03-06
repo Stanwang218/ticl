@@ -589,8 +589,8 @@ def validate_model(model, config):
 
     if 'transformer' in config:
         attention_type = 'transformer'
-    elif 'ssm' in config:
-        attention_type = 'ssm'
+    elif 'linear_attention' in config:
+        attention_type = 'linear_attention'
     else:
         raise ValueError(f"Unknown attention type")
     

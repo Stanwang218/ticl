@@ -35,7 +35,7 @@ import datetime
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', type = str, default = 'ssm_tabpfn_b4_largedatasetTrue_modellinear_attention_nsamples10000_08_01_2024_20_58_55') # _on_exit.cpkt
+parser.add_argument('--model', type = str, default = 'linear_attention_tabpfn_b4_largedatasetTrue_modellinear_attention_nsamples10000_08_01_2024_20_58_55') # _on_exit.cpkt
 parser.add_argument('--fetch_only', action='store_true', default = False)
 parser.add_argument('--split_numbers', type = int, default = 1)
 parser.add_argument('--dataset_num', type = int, default = 10000)
@@ -93,7 +93,7 @@ clf_dict= {
     'resnet': resnet_metric,
 }
 
-if 'tabflex' in args.model or 'ssm_tabpfn' in args.model:
+if 'tabflex' in args.model or 'linear_attention_tabpfn' in args.model:
     model_name = 'tabflex'
     tabflex = TabPFNClassifier(
         device = device_dict.get(model_name, 'cpu'),

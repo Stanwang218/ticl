@@ -82,9 +82,9 @@ def extract_mlp_model(model, config, X_train, y_train, device="cpu", inference_d
     if hasattr(model, "transformer_encoder"):
         # tabpfn mlp model maker
         output = model.transformer_encoder(train_x)
-    elif hasattr(model, "ssm"):
-        # ssm model maker
-        output = model.ssm(train_x)
+    elif hasattr(model, "linear_attention"):
+        # linear_attention model maker
+        output = model.linear_attention(train_x)
     else:
         # perceiver
         data = rearrange(train_x, 'n b d -> b n d')

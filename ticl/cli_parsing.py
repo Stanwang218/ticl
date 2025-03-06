@@ -119,24 +119,24 @@ def argparser_from_config(parser, description="Train Mothernet"):
         transformer.add_argument('--pre-norm', action='store_true')
         transformer.add_argument('--classification-task', type=str2bool, help='Whether to use classification or regression.')
         transformer.set_defaults(**config['transformer'])
-    elif 'ssm' in config:
-        ssm = parser.add_argument_group('ssm')
-        ssm.add_argument('-e', '--emsize', type=int, help='embedding size')
-        ssm.add_argument('-N', '--nlayers', type=int, help='number of transformer layers')
-        ssm.add_argument('--init-method', help='Weight initialization method.')
-        ssm.add_argument('--y-encoder', help='Encoder for labels. "linear", "onehot" or None.')
-        ssm.add_argument('--tabpfn-zero-weights', help='Whether to use zeroing of weights from tabpfn code.', type=str2bool)
-        ssm.add_argument('--pre-norm', action='store_true')
-        ssm.add_argument('--classification-task', type=str2bool, help='Whether to use classification or regression.')
-        ssm.add_argument('--model', type = str, choices = ['linear_attention', 'fla'], help = 'which ssm model to use')
+    elif 'linear_attention' in config:
+        linear_attention = parser.add_argument_group('linear_attention')
+        linear_attention.add_argument('-e', '--emsize', type=int, help='embedding size')
+        linear_attention.add_argument('-N', '--nlayers', type=int, help='number of transformer layers')
+        linear_attention.add_argument('--init-method', help='Weight initialization method.')
+        linear_attention.add_argument('--y-encoder', help='Encoder for labels. "linear", "onehot" or None.')
+        linear_attention.add_argument('--tabpfn-zero-weights', help='Whether to use zeroing of weights from tabpfn code.', type=str2bool)
+        linear_attention.add_argument('--pre-norm', action='store_true')
+        linear_attention.add_argument('--classification-task', type=str2bool, help='Whether to use classification or regression.')
+        linear_attention.add_argument('--model', type = str, choices = ['linear_attention', 'fla'], help = 'which linear_attention model to use')
         
         ## specific to fla
-        ssm.add_argument('--feature-map', help='when the model is fla, which feature map to use', type = str, choices = ['identity_for_real', 'elu', 'hedgehog', 'hedgehog_shared'])
-        ssm.add_argument('--norm-output', help='when the model is fla, whether to normalize the output of the model', action = 'store_true', default = False)
-        ssm.add_argument('--causal-mask', help='when the model is fla, Whether to use causal attention', action='store_true', default=False)
-        ssm.set_defaults(**config['ssm'])
+        linear_attention.add_argument('--feature-map', help='when the model is fla, which feature map to use', type = str, choices = ['identity_for_real', 'elu', 'hedgehog', 'hedgehog_shared'])
+        linear_attention.add_argument('--norm-output', help='when the model is fla, whether to normalize the output of the model', action = 'store_true', default = False)
+        linear_attention.add_argument('--causal-mask', help='when the model is fla, Whether to use causal attention', action='store_true', default=False)
+        linear_attention.set_defaults(**config['linear_attention'])
     else:
-        raise ValueError("No transformer or ssm config found in model config.")
+        raise ValueError("No transformer or linear_attention config found in model config.")
 
     if model_type in ['baam', 'batabpfn']:
         biattention = parser.add_argument_group('biattention')

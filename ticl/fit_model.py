@@ -28,7 +28,7 @@ def main(argv, extra_config=None):
     # this is the generic entry point for training any model, so it has A LOT of options
     parser = make_model_level_argparser()
     args = parser.parse_args(args=argv or ['--help'])
-    model = args.ssm.model if 'ssm' in args.model_type else None
+    model = args.linear_attention.model if 'linear_attention' in args.model_type else None
     config = get_model_default_config(args.model_type, model)
 
     device, rank, num_gpus = init_device(args.general.gpu_id, args.general.use_cpu)
@@ -62,8 +62,8 @@ def main(argv, extra_config=None):
 
     if 'transformer' in config:
         attention_type = 'transformer'
-    elif 'ssm' in config:
-        attention_type = 'ssm'
+    elif 'linear_attention' in config:
+        attention_type = 'linear_attention'
     else:
         raise ValueError(f"Unknown attention type")
 

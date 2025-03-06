@@ -86,10 +86,10 @@ final_configs = []
 for config in configs:
     # if config['select_states_dim'] < config['updatable_states_dim']: continue
     # if config['select_channels_dim'] < config['updatable_channels_dim']: continue
-    # if config['ssm_method'] != 'ours' and config['lp_method'] == 'ours': continue
-    # if config['ssm_method'] == 'lora' and config['lp_method'] != 'lora': continue
-    # if config['ssm_method'] == 'lora' and config['lp_method'] == 'lora': 
-    #     if config['ssm_lora_rank'] != config['lp_lora_rank']: continue
+    # if config['linear_attention_method'] != 'ours' and config['lp_method'] == 'ours': continue
+    # if config['linear_attention_method'] == 'lora' and config['lp_method'] != 'lora': continue
+    # if config['linear_attention_method'] == 'lora' and config['lp_method'] == 'lora': 
+    #     if config['linear_attention_lora_rank'] != config['lp_lora_rank']: continue
     final_configs.append(config)
     
 print("Remove redundant configs, config number ", len(final_configs))

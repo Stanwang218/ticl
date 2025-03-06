@@ -73,6 +73,11 @@ def load_model(path, device, verbose=False):
         model_state['encoder.1.weight'] = model_state.pop("encoder.weight")
         model_state['encoder.1.bias'] = model_state.pop("encoder.bias")
 
+    for module_name in list(model_state.keys()):
+        if module_name.startswith("ssm"):
+            # for backwards compatibility
+            model_state["linear_attention" + module_name[3:]] = model_state.pop(module_name)
+
     model.load_state_dict(model_state)
     model.to(device)
     model.eval()
@@ -198,8 +203,10 @@ def get_model(
 
     if 'transformer' in config:
         attention_type = 'transformer'
-    elif 'ssm' in config:
-        attention_type = 'ssm'
+    elif 'linear_attention' in config:
+        attention_type = 'linear_attention'
+        if 'ssm' in passed_config:
+            passed_config['linear_attention'] = passed_config.pop('ssm')
     else:
         raise ValueError(f"Unknown attention type")
     
@@ -254,12 +261,12 @@ def get_model(
             y_encoder_layer=y_encoder, **config['transformer'], **config['mothernet'], **config['additive'])
     elif model_type in ['tabflex', 'ssm_tabpfn']:
         from ticl.models.tabflex import TabFlex
-        config['ssm'].pop('causal_mask', None)
+        config['linear_attention'].pop('causal_mask', None)
         model = TabFlex(
             n_out=n_out, 
             n_features=n_features, 
             y_encoder_layer=y_encoder, 
-            **config['ssm']
+            **config['linear_attention']
         )
     elif model_type == 'la_mothernet':
         from ticl.models.la_mothernet import SSMMotherNet
@@ -267,7 +274,7 @@ def get_model(
             n_out=n_out, 
             y_encoder_layer=y_encoder, 
             n_features=n_features, 
-            **config['ssm'], 
+            **config['linear_attention'], 
             **config['mothernet']
         )
     else:
@@ -283,7 +290,7 @@ def get_model(
     if verbose:
         model_size = sum(p.numel() for p in model.parameters())
         if wandb.run: wandb.log({"model_size": model_size})
-        if 'ssm' in model_type:
+        if 'linear_attention' in model_type:
             print(f"Using a SSM with {model_size/1000/1000:.{2}f} M parameters")
         else:
             print(f"Using a Transformer with {model_size/1000/1000:.{2}f} M parameters")
@@ -295,7 +302,7 @@ def get_model(
         model.wallclock_times = config.get('wallclock_times', [])
 
     if should_train:
-        model_attr = None if 'ssm' not in model_type else config['ssm']['model']
+        model_attr = None if 'linear_attention' not in model_type else config['linear_attention']['model']
         dl = get_dataloader(
             prior_config=config['prior'], 
             dataloader_config=config['dataloader'], 

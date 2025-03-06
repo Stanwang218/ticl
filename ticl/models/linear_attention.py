@@ -361,7 +361,7 @@ def get_linear_attention_layers(
     n_layer: int,
     d_intermediate: int,
     model = 'linear_attention',
-    ssm_cfg=None,
+    linear_attention_cfg=None,
     attn_layer_idx=None,
     attn_cfg=None,
     norm_epsilon: float = 1e-5,
