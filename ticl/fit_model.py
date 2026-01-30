@@ -9,12 +9,13 @@ import mlflow
 
 import torch
 import os
+sys.path.append(os.path.curdir)
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
 from git import Repo
 
 from ticl.model_builder import get_model
-from ticl.utils import init_device, get_model_string, synetune_handle_checkpoint, make_training_callback
+from ticl.utils import init_device, get_model_string, synetune_handle_checkpoint, make_training_callback, dict2json
 from ticl.config_utils import compare_dicts, flatten_dict, update_config
 from ticl.cli_parsing import make_model_level_argparser
 from ticl.model_configs import get_model_default_config
@@ -178,7 +179,8 @@ def main(argv, extra_config=None):
             id=model_string,
             config=wandb_config,
         )
-
+    dict2json(config, os.path.join(os.path.join(base_path, 'config'), f"{model_string}_config.json"))
+    # exit()
     if (not orchestration.use_mlflow) or mlflow_hostname is None:
         print("Not logging run with mlflow, set MLFLOW_HOSTNAME environment to variable enable mlflow.")
         total_loss, model, dl, epoch = get_model(

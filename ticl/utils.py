@@ -17,6 +17,7 @@ from torch.optim.optimizer import Optimizer
 from ticl.model_configs import get_model_default_config
 from ticl.config_utils import flatten_dict
 import itertools
+import json
 
 class DownloadProgressBar(tqdm):
     def update_to(self, b=1, bsize=1, tsize=None):
@@ -24,6 +25,8 @@ class DownloadProgressBar(tqdm):
             self.total = tsize
         self.update(b * bsize - self.n)
 
+def get_module_path():
+    return Path(__file__).parent.resolve()
 
 def fetch_model(file_name):
     model_path = Path(get_module_path()) / 'models_diff' / file_name
@@ -35,9 +38,13 @@ def fetch_model(file_name):
             urllib.request.urlretrieve(url, filename=model_path, reporthook=t.update_to)
     return model_path.resolve()
 
+def dict2json(d, path):
+    json_str = json.dumps(d, indent=4, sort_keys=True, default=str)
+    with open(path, 'w') as f:
+        f.write(json_str)
+        
+# fetch_model('mn_d2048_H4096_L2_W32_P512_1_gpu_warm_08_25_2023_21_46_25_epoch_3940_no_optimizer.pickle')
 
-def get_module_path():
-    return Path(__file__).parent.resolve()
 
 
 class SeqBN(nn.Module):
@@ -354,7 +361,7 @@ def init_device(gpu_id, use_cpu):
         rank = 0
         num_gpus = 1
 
-    device = "cuda"
+    device = "cuda" if torch.cuda.is_available() and not use_cpu else "cpu"
     if gpu_id is not None:
         if use_cpu:
             raise ValueError("Can't use cpu and gpu at the same time")

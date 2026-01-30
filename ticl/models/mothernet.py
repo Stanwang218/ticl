@@ -32,7 +32,7 @@ class MLPModelPredictor(nn.Module):
             repeated_class_tokens = self.y_encoder.weight.T.unsqueeze(1).repeat(1, enc_train.shape[1], 1)
             enc_train = torch.cat([repeated_class_tokens, enc_train], 0)
 
-        output = self.inner_forward(enc_train)
+        output = self.inner_forward(enc_train) # transformer encoder output
         (b1, w1), *layers = self.decoder(output, y[:single_eval_pos])
 
         x_test_nona = torch.nan_to_num(x[single_eval_pos:], nan=0)

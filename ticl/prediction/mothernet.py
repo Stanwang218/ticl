@@ -16,7 +16,7 @@ from ticl.evaluation.baselines.torch_mlp import TorchMLP, NeuralNetwork
 
 def extract_linear_model(model, X_train, y_train, device="cpu"):
     max_features = 100
-    eval_position = X_train.shape[0]
+    eval_position = X_train.shape[0] # number of context
     n_classes = len(np.unique(y_train))
     n_features = X_train.shape[1]
 
@@ -33,12 +33,14 @@ def extract_linear_model(model, X_train, y_train, device="cpu"):
     y_src = model.y_encoder(ys.unsqueeze(1).unsqueeze(-1))
     train_x = x_src + y_src
     output = model.transformer_encoder(train_x)
-    linear_model_coefs = model.decoder(output)
-    encoder_weight = model.encoder.get_parameter("weight")
+    linear_model_coefs = model.decoder(output) # shape: (1, n_features + 1, n_classes)
+    encoder_weight = model.encoder.get_parameter("weight") # shape: (hidden_size, n_features)
     encoder_bias = model.encoder.get_parameter("bias")
 
-    total_weights = torch.matmul(encoder_weight[:, :n_features].T, linear_model_coefs[0, :-1, :n_classes])
+    total_weights = torch.matmul(encoder_weight[:, :n_features].T, linear_model_coefs[0, :-1, :n_classes]) 
+    # number of features x hidden size @ hidden size x n_classes = number of features x n_classes
     total_biases = torch.matmul(encoder_bias, linear_model_coefs[0, :-1, :n_classes]) + linear_model_coefs[0, -1, :n_classes]
+    # 1 x hidden size @ hidden size x n_classes = 1 x n_classes
     return total_weights.detach().cpu().numpy() / (n_features / max_features), total_biases.detach().cpu().numpy()
 
 
