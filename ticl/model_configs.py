@@ -144,7 +144,7 @@ def get_prior_config(max_features=100, n_samples=1024+128):
 
     dataloader = {
         "batch_size": 8,
-        "num_steps": 8192,
+        "num_steps": None,
         'min_eval_pos': 2,
         'random_n_samples': 0,
         'n_test_samples': 0,
